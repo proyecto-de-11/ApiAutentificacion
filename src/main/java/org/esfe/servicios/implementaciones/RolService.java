@@ -93,12 +93,11 @@ public class RolService implements IRolService {
     @Transactional(readOnly = true)
     public Page<RolSalidaDto> obtenerRolesPaginadosYFiltrados(Optional<String> busqueda, Pageable pageable) {
         Page<Rol> page;
-        // Normalizar posible null en Optional y evitar comparaciones con null
-        Optional<String> criterio = Optional.ofNullable(busqueda).orElse(Optional.empty());
-        if (criterio.filter(s -> !s.isBlank()).isEmpty()) {
+        // Corregir manejo del Optional<String>
+        if (busqueda == null || busqueda.isEmpty() || busqueda.get().isBlank()) {
             page = rolRepository.findAll(pageable);
         } else {
-            String q = criterio.get().trim();
+            String q = busqueda.get().trim();
             page = rolRepository.findByNombreContainingIgnoreCaseOrDescripcionContainingIgnoreCase(q, q, pageable);
         }
         return page.map(this::mapToDto);
