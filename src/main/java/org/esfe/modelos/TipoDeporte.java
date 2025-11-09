@@ -2,8 +2,8 @@ package org.esfe.modelos;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "preferencias")
-public class Preferencias {
+@Table(name = "tipos_deporte")
+public class TipoDeporte {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

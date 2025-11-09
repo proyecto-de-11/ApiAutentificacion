@@ -1,11 +1,16 @@
-package org.esfe.dtos;
+package org.esfe.dtos.tiposdeporte;
 
 import java.io.Serializable;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public class PreferenciasGuardarDto implements Serializable {
+public class TiposDeporteModificarDto implements Serializable {
+
+    @NotNull(message = "El ID de la preferencia es obligatorio para la modificación.")
+    @Min(value = 1, message = "El ID debe ser un valor positivo.")
+    private Long id;
 
     @NotNull(message = "El nombre no puede ser nulo.")
     @NotBlank(message = "El nombre es obligatorio.")
@@ -20,6 +25,14 @@ public class PreferenciasGuardarDto implements Serializable {
 
     @NotNull(message = "El estado (estaActivo) es obligatorio.")
     private Boolean estaActivo;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getNombre() {
         return nombre;
