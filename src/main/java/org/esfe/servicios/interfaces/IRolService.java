@@ -1,8 +1,8 @@
 package org.esfe.servicios.interfaces;
 
-import org.esfe.dtos.RolGuardarDto;
-import org.esfe.dtos.RolModificarDto;
-import org.esfe.dtos.RolSalidaDto;
+import org.esfe.dtos.rol.RolGuardarDto;
+import org.esfe.dtos.rol.RolModificarDto;
+import org.esfe.dtos.rol.RolSalidaDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

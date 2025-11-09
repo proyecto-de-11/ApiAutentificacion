@@ -1,8 +1,8 @@
 package org.esfe.controladores;
 
-import org.esfe.dtos.RolGuardarDto;
-import org.esfe.dtos.RolModificarDto;
-import org.esfe.dtos.RolSalidaDto;
+import org.esfe.dtos.rol.RolGuardarDto;
+import org.esfe.dtos.rol.RolModificarDto;
+import org.esfe.dtos.rol.RolSalidaDto;
 import org.esfe.servicios.interfaces.IRolService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

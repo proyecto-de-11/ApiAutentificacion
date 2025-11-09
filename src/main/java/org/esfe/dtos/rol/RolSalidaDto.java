@@ -1,4 +1,4 @@
-package org.esfe.dtos;
+package org.esfe.dtos.rol;
 
 import java.io.Serializable;
 

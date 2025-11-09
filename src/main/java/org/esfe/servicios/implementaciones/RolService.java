@@ -1,8 +1,8 @@
 package org.esfe.servicios.implementaciones;
 
-import org.esfe.dtos.RolGuardarDto;
-import org.esfe.dtos.RolModificarDto;
-import org.esfe.dtos.RolSalidaDto;
+import org.esfe.dtos.rol.RolGuardarDto;
+import org.esfe.dtos.rol.RolModificarDto;
+import org.esfe.dtos.rol.RolSalidaDto;
 import org.esfe.modelos.Rol;
 import org.esfe.repositorios.IRolRepository;
 import org.esfe.servicios.interfaces.IRolService;
