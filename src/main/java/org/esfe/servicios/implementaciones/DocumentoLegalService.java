@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -63,6 +64,7 @@ public class DocumentoLegalService implements IDocumentoLegalService {
         DocumentoLegal documento = modelMapper.map(dto, DocumentoLegal.class);
         // Asegurar que el ID sea null para crear un nuevo registro
         documento.setId(null); 
+        documento.setFechaCreacion(LocalDateTime.now());
         
         DocumentoLegal guardado = documentoLegalRepository.save(documento);
 
