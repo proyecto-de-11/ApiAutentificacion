@@ -12,11 +12,11 @@ public class UsuarioAceptacionTermino {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idUsuario", nullable = false)
-    private Usuario usuario_id;
+    private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idDocumentoLegal", nullable = false)
-    private DocumentoLegal documentoLegal_id;
+    private DocumentoLegal documentoLegal;
 
     @Column(name = "fecha_aceptacion", nullable = false, columnDefinition = "DATETIME")
     private String fechaAceptacion;
@@ -30,19 +30,19 @@ public class UsuarioAceptacionTermino {
     }
 
     public Usuario getUsuario() {
-        return usuario_id;
+        return usuario;
     }
 
     public void setUsuario(Usuario usuario) {
-        this.usuario_id = usuario;
+        this.usuario = usuario;
     }
 
     public DocumentoLegal getDocumentoLegal() {
-        return documentoLegal_id;
+        return documentoLegal;
     }
 
     public void setDocumentoLegal(DocumentoLegal documentoLegal) {
-        this.documentoLegal_id = documentoLegal;
+        this.documentoLegal = documentoLegal;
     }
 
     public String getFechaAceptacion() {
