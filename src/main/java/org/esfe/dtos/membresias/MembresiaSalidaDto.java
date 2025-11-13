@@ -1,16 +1,17 @@
 package org.esfe.dtos.membresias;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class MembresiaSalidaDto {
 
     private Integer id;
     private String nombre;
-    private String titulo;
-    private String contenido;
-    private String version;
-    private LocalDate fechaVigencia;
+    private String descripcion;
+    private BigDecimal precioMensual;
+    private String beneficios;
+    private Integer maxReservasMes;
+    private Integer descuentoPorcentaje;
     private Boolean estaActivo;
     private LocalDateTime fechaCreacion;
 
@@ -31,36 +32,44 @@ public class MembresiaSalidaDto {
         this.nombre = nombre;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
-    public String getContenido() {
-        return contenido;
+    public BigDecimal getPrecioMensual() {
+        return precioMensual;
     }
 
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
+    public void setPrecioMensual(BigDecimal precioMensual) {
+        this.precioMensual = precioMensual;
     }
 
-    public String getVersion() {
-        return version;
+    public String getBeneficios() {
+        return beneficios;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setBeneficios(String beneficios) {
+        this.beneficios = beneficios;
     }
 
-    public LocalDate getFechaVigencia() {
-        return fechaVigencia;
+    public Integer getMaxReservasMes() {
+        return maxReservasMes;
     }
 
-    public void setFechaVigencia(LocalDate fechaVigencia) {
-        this.fechaVigencia = fechaVigencia;
+    public void setMaxReservasMes(Integer maxReservasMes) {
+        this.maxReservasMes = maxReservasMes;
+    }
+
+    public Integer getDescuentoPorcentaje() {
+        return descuentoPorcentaje;
+    }
+
+    public void setDescuentoPorcentaje(Integer descuentoPorcentaje) {
+        this.descuentoPorcentaje = descuentoPorcentaje;
     }
 
     public Boolean getEstaActivo() {
@@ -79,4 +88,3 @@ public class MembresiaSalidaDto {
         this.fechaCreacion = fechaCreacion;
     }
 }
-

@@ -1,8 +1,7 @@
 package org.esfe.dtos.membresias;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
 public class MembresiaModificarDto {
 
@@ -12,17 +11,22 @@ public class MembresiaModificarDto {
     @NotBlank(message = "El nombre es requerido")
     private String nombre;
 
-    @NotBlank(message = "El título es requerido")
-    private String titulo;
+    @NotBlank(message = "La descripción es requerida")
+    private String descripcion;
 
-    @NotBlank(message = "El contenido es requerido")
-    private String contenido;
+    @NotNull(message = "El precio mensual es requerido")
+    @DecimalMin(value = "0.0", inclusive = false, message = "El precio mensual debe ser mayor que 0")
+    private BigDecimal precioMensual;
 
-    @NotBlank(message = "La versión es requerida")
-    private String version;
+    private String beneficios;
 
-    @NotNull(message = "La fecha de vigencia es requerida")
-    private LocalDate fechaVigencia;
+    @NotNull(message = "El máximo de reservas por mes es requerido")
+    private Integer maxReservasMes;
+
+    @NotNull(message = "El descuento en porcentaje es requerido")
+    @Min(value = 0, message = "El descuento no puede ser negativo")
+    @Max(value = 100, message = "El descuento no puede ser mayor a 100")
+    private Integer descuentoPorcentaje;
 
     @NotNull(message = "El estado activo es requerido")
     private Boolean estaActivo;
@@ -44,36 +48,44 @@ public class MembresiaModificarDto {
         this.nombre = nombre;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
-    public String getContenido() {
-        return contenido;
+    public BigDecimal getPrecioMensual() {
+        return precioMensual;
     }
 
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
+    public void setPrecioMensual(BigDecimal precioMensual) {
+        this.precioMensual = precioMensual;
     }
 
-    public String getVersion() {
-        return version;
+    public String getBeneficios() {
+        return beneficios;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setBeneficios(String beneficios) {
+        this.beneficios = beneficios;
     }
 
-    public LocalDate getFechaVigencia() {
-        return fechaVigencia;
+    public Integer getMaxReservasMes() {
+        return maxReservasMes;
     }
 
-    public void setFechaVigencia(LocalDate fechaVigencia) {
-        this.fechaVigencia = fechaVigencia;
+    public void setMaxReservasMes(Integer maxReservasMes) {
+        this.maxReservasMes = maxReservasMes;
+    }
+
+    public Integer getDescuentoPorcentaje() {
+        return descuentoPorcentaje;
+    }
+
+    public void setDescuentoPorcentaje(Integer descuentoPorcentaje) {
+        this.descuentoPorcentaje = descuentoPorcentaje;
     }
 
     public Boolean getEstaActivo() {
@@ -84,4 +96,3 @@ public class MembresiaModificarDto {
         this.estaActivo = estaActivo;
     }
 }
-

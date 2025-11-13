@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -14,14 +14,11 @@ public interface IMembresiaRepository extends JpaRepository<Membresia, Integer> 
 
     List<Membresia> findByNombreContainingIgnoreCase(String texto);
 
-    List<Membresia> findByTituloContainingIgnoreCase(String texto);
+    List<Membresia> findByDescripcionContainingIgnoreCase(String texto);
 
     List<Membresia> findByEstaActivo(Boolean estaActivo);
 
-    List<Membresia> findByFechaVigenciaBefore(LocalDate fecha);
+    Page<Membresia> findByNombreContainingIgnoreCaseOrDescripcionContainingIgnoreCase(String nombre, String descripcion, Pageable pageable);
 
-    Page<Membresia> findByNombreContainingIgnoreCaseOrTituloContainingIgnoreCase(String nombre, String titulo, Pageable pageable);
-
-    boolean existsByNombreAndVersion(String nombre, String version);
+    boolean existsByNombreAndPrecioMensual(String nombre, BigDecimal precioMensual);
 }
-

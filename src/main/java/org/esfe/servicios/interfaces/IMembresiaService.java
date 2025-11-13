@@ -6,7 +6,7 @@ import org.esfe.dtos.membresias.MembresiaSalidaDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,10 +24,7 @@ public interface IMembresiaService {
 
     Page<MembresiaSalidaDto> obtenerMembresiasPaginadasYFiltradas(Optional<String> busqueda, Pageable pageable);
 
-    boolean existePorNombreYVersion(String nombre, String version);
-
-    List<MembresiaSalidaDto> buscarPorFechaVigenciaAnteriorA(LocalDate fecha);
+    boolean existePorNombreYPrecioMensual(String nombre, BigDecimal precioMensual);
 
     List<MembresiaSalidaDto> buscarPorEstaActivo(Boolean estaActivo);
 }
-

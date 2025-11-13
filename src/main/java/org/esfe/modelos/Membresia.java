@@ -1,8 +1,8 @@
 package org.esfe.modelos;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "membresias")
@@ -15,17 +15,20 @@ public class Membresia {
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "titulo", nullable = false, length = 150)
-    private String titulo;
+    @Column(name = "descripcion", columnDefinition = "TEXT", nullable = false)
+    private String descripcion;
 
-    @Column(name = "contenido", columnDefinition = "TEXT", nullable = false)
-    private String contenido;
+    @Column(name = "precio_mensual", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    private BigDecimal precioMensual;
 
-    @Column(name = "version", nullable = false, length = 50)
-    private String version;
+    @Column(name = "beneficios", columnDefinition = "JSON")
+    private String beneficios;
 
-    @Column(name = "fecha_vigencia", nullable = false, columnDefinition = "DATE")
-    private LocalDate fechaVigencia;
+    @Column(name = "max_reservas_mes", nullable = false)
+    private Integer maxReservasMes;
+
+    @Column(name = "descuento_porcentaje", nullable = false)
+    private Integer descuentoPorcentaje;
 
     @Column(name = "esta_activo", nullable = false, columnDefinition = "BOOLEAN")
     private Boolean estaActivo;
@@ -50,36 +53,44 @@ public class Membresia {
         this.nombre = nombre;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
-    public String getContenido() {
-        return contenido;
+    public BigDecimal getPrecioMensual() {
+        return precioMensual;
     }
 
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
+    public void setPrecioMensual(BigDecimal precioMensual) {
+        this.precioMensual = precioMensual;
     }
 
-    public String getVersion() {
-        return version;
+    public String getBeneficios() {
+        return beneficios;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setBeneficios(String beneficios) {
+        this.beneficios = beneficios;
     }
 
-    public LocalDate getFechaVigencia() {
-        return fechaVigencia;
+    public Integer getMaxReservasMes() {
+        return maxReservasMes;
     }
 
-    public void setFechaVigencia(LocalDate fechaVigencia) {
-        this.fechaVigencia = fechaVigencia;
+    public void setMaxReservasMes(Integer maxReservasMes) {
+        this.maxReservasMes = maxReservasMes;
+    }
+
+    public Integer getDescuentoPorcentaje() {
+        return descuentoPorcentaje;
+    }
+
+    public void setDescuentoPorcentaje(Integer descuentoPorcentaje) {
+        this.descuentoPorcentaje = descuentoPorcentaje;
     }
 
     public Boolean getEstaActivo() {
@@ -98,4 +109,3 @@ public class Membresia {
         this.fechaCreacion = fechaCreacion;
     }
 }
-

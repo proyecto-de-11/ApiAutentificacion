@@ -16,7 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -51,8 +51,8 @@ public class MembresiaService implements IMembresiaService {
 
     @Override
     public MembresiaSalidaDto crear(MembresiaGuardarDto dto) {
-        if (membresiaRepository.existsByNombreAndVersion(dto.getNombre(), dto.getVersion())) {
-            throw new IllegalArgumentException("Ya existe una membresía con el nombre '" + dto.getNombre() + "' y la versión '" + dto.getVersion() + "'.");
+        if (membresiaRepository.existsByNombreAndPrecioMensual(dto.getNombre(), dto.getPrecioMensual())) {
+            throw new IllegalArgumentException("Ya existe una membresía con el nombre '" + dto.getNombre() + "' y el mismo precio.");
         }
 
         Membresia m = modelMapper.map(dto, Membresia.class);
@@ -68,10 +68,10 @@ public class MembresiaService implements IMembresiaService {
         Membresia existente = membresiaRepository.findById(dto.getId())
                 .orElseThrow(() -> new NoSuchElementException("Membresía no encontrada con id: " + dto.getId()));
 
-        boolean otroConMismoNombreYVersion = membresiaRepository.existsByNombreAndVersion(dto.getNombre(), dto.getVersion());
-        if (otroConMismoNombreYVersion && (existente.getNombre() == null || !existente.getNombre().equals(dto.getNombre()) ||
-                existente.getVersion() == null || !existente.getVersion().equals(dto.getVersion()))) {
-            throw new IllegalArgumentException("Otra membresía ya existe con el nombre '" + dto.getNombre() + "' y la versión '" + dto.getVersion() + "'.");
+        boolean otroConMismoNombreYPrecio = membresiaRepository.existsByNombreAndPrecioMensual(dto.getNombre(), dto.getPrecioMensual());
+        if (otroConMismoNombreYPrecio && (existente.getNombre() == null || !existente.getNombre().equals(dto.getNombre()) ||
+                existente.getPrecioMensual() == null || existente.getPrecioMensual().compareTo(dto.getPrecioMensual()) != 0)) {
+            throw new IllegalArgumentException("Otra membresía ya existe con el nombre '" + dto.getNombre() + "' y el mismo precio.");
         }
 
         modelMapper.map(dto, existente);
@@ -99,7 +99,7 @@ public class MembresiaService implements IMembresiaService {
         String textoBusqueda = busqueda.orElse("").trim();
 
         if (!textoBusqueda.isBlank()) {
-            page = membresiaRepository.findByNombreContainingIgnoreCaseOrTituloContainingIgnoreCase(textoBusqueda, textoBusqueda, pageable);
+            page = membresiaRepository.findByNombreContainingIgnoreCaseOrDescripcionContainingIgnoreCase(textoBusqueda, textoBusqueda, pageable);
         } else {
             page = membresiaRepository.findAll(pageable);
         }
@@ -110,14 +110,8 @@ public class MembresiaService implements IMembresiaService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean existePorNombreYVersion(String nombre, String version) {
-        return membresiaRepository.existsByNombreAndVersion(nombre, version);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<MembresiaSalidaDto> buscarPorFechaVigenciaAnteriorA(LocalDate fecha) {
-        return membresiaRepository.findByFechaVigenciaBefore(fecha).stream().map(this::mapToDto).collect(Collectors.toList());
+    public boolean existePorNombreYPrecioMensual(String nombre, BigDecimal precioMensual) {
+        return membresiaRepository.existsByNombreAndPrecioMensual(nombre, precioMensual);
     }
 
     @Override
@@ -126,4 +120,3 @@ public class MembresiaService implements IMembresiaService {
         return membresiaRepository.findByEstaActivo(estaActivo).stream().map(this::mapToDto).collect(Collectors.toList());
     }
 }
-
