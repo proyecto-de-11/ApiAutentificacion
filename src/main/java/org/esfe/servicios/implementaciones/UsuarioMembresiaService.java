@@ -55,6 +55,11 @@ public class UsuarioMembresiaService implements IUsuarioMembresiaService {
 
     @Override
     public UsuarioMembresiaSalidaDto crear(UsuarioMembresiaGuardarDto dto) {
+        // Verificar si el usuario ya tiene una membresía asignada
+        if (usuarioMembresiaRepository.findByUsuarioId(dto.getUsuarioId()).isPresent()) {
+            throw new IllegalArgumentException("El usuario ya tiene una membresía asignada.");
+        }
+
         UsuarioMembresia um = new UsuarioMembresia();
         Usuario u = new Usuario();
         u.setId(dto.getUsuarioId());
@@ -109,8 +114,7 @@ public class UsuarioMembresiaService implements IUsuarioMembresiaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UsuarioMembresiaSalidaDto> obtenerPorUsuario(Integer usuarioId) {
-        return usuarioMembresiaRepository.findByUsuarioId(usuarioId).stream().map(this::mapToDto).collect(Collectors.toList());
+    public Optional<UsuarioMembresiaSalidaDto> obtenerPorUsuario(Integer usuarioId) {
+        return usuarioMembresiaRepository.findByUsuarioId(usuarioId).map(this::mapToDto);
     }
 }
-

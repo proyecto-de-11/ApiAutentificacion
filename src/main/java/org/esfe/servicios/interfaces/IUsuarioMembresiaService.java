@@ -23,6 +23,5 @@ public interface IUsuarioMembresiaService {
 
     Page<UsuarioMembresiaSalidaDto> obtenerPaginados(Pageable pageable);
 
-    List<UsuarioMembresiaSalidaDto> obtenerPorUsuario(Integer usuarioId);
+    Optional<UsuarioMembresiaSalidaDto> obtenerPorUsuario(Integer usuarioId);
 }
-
