@@ -1,7 +1,8 @@
 package org.esfe.servicios.implementaciones;
 
-import org.esfe.dtos.usuario.PerfilDTO;
-import org.esfe.dtos.usuario.PerfilCreateDTO;
+import org.esfe.dtos.usuario.PerfilSalidaDto;
+import org.esfe.dtos.usuario.PerfilGuardarDto;
+import org.esfe.dtos.usuario.PerfilModificarDto;
 import org.esfe.modelos.Perfil;
 import org.esfe.modelos.Usuario;
 import org.esfe.repositorios.IPerfilRepository;
@@ -31,7 +32,7 @@ public class PerfilService implements IPerfilService {
     private ModelMapper modelMapper;
 
     @Override
-    public List<PerfilDTO> listarTodos() {
+    public List<PerfilSalidaDto> listarTodos() {
         return perfilRepository.findAll()
                 .stream()
                 .map(this::convertToDto)
@@ -39,14 +40,14 @@ public class PerfilService implements IPerfilService {
     }
 
     @Override
-    public PerfilDTO obtenerPorId(Integer id) {
+    public PerfilSalidaDto obtenerPorId(Integer id) {
         Perfil perfil = perfilRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil no encontrado"));
         return convertToDto(perfil);
     }
 
     @Override
-    public PerfilDTO crear(PerfilCreateDTO dto) {
+    public PerfilSalidaDto crear(PerfilGuardarDto dto) {
         // Verificar que no exista ya un perfil para ese usuario (one-to-one)
         if (perfilRepository.existsByUsuario_Id(dto.getUsuarioId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya tiene un perfil");
@@ -61,7 +62,7 @@ public class PerfilService implements IPerfilService {
     }
 
     @Override
-    public PerfilDTO actualizar(Integer id, PerfilCreateDTO dto) {
+    public PerfilSalidaDto actualizar(Integer id, PerfilModificarDto dto) {
         Perfil perfil = perfilRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil no encontrado"));
 
@@ -99,14 +100,14 @@ public class PerfilService implements IPerfilService {
     }
 
     @Override
-    public PerfilDTO obtenerPorUsuarioId(Integer usuarioId) {
+    public PerfilSalidaDto obtenerPorUsuarioId(Integer usuarioId) {
         Perfil perfil = perfilRepository.findByUsuario_Id(usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil para usuario no encontrado"));
         return convertToDto(perfil);
     }
 
     @Override
-    public List<PerfilDTO> buscarPorCiudad(String ciudad) {
+    public List<PerfilSalidaDto> buscarPorCiudad(String ciudad) {
         return perfilRepository.findByCiudadIgnoreCase(ciudad)
                 .stream()
                 .map(this::convertToDto)
@@ -114,15 +115,15 @@ public class PerfilService implements IPerfilService {
     }
 
     @Override
-    public List<PerfilDTO> buscarPorPaisYCiudad(String pais, String ciudad) {
+    public List<PerfilSalidaDto> buscarPorPaisYCiudad(String pais, String ciudad) {
         return perfilRepository.buscarPorPaisYCiudad(pais, ciudad)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    private PerfilDTO convertToDto(Perfil perfil) {
-        PerfilDTO dto = modelMapper.map(perfil, PerfilDTO.class);
+    private PerfilSalidaDto convertToDto(Perfil perfil) {
+        PerfilSalidaDto dto = modelMapper.map(perfil, PerfilSalidaDto.class);
         if (perfil.getUsuario() != null) {
             dto.setUsuarioId(perfil.getUsuario().getId());
         }

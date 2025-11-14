@@ -1,12 +1,10 @@
 package org.esfe.dtos.usuario;
 
 import java.time.LocalDate;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public class PerfilCreateDTO {
-    @NotNull(message = "usuarioId es requerido")
-    private Integer usuarioId;
+public class PerfilModificarDto {
+    private Integer usuarioId; // opcional en modificación
 
     private String nombreCompleto;
     private String telefono;
@@ -52,3 +50,4 @@ public class PerfilCreateDTO {
     public String getPais() { return pais; }
     public void setPais(String pais) { this.pais = pais; }
 }
+

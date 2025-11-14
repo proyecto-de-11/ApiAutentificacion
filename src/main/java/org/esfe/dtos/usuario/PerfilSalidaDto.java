@@ -3,7 +3,7 @@ package org.esfe.dtos.usuario;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class PerfilDTO {
+public class PerfilSalidaDto {
     private Integer id;
     private Integer usuarioId;
     private String nombreCompleto;

@@ -1,17 +1,18 @@
 package org.esfe.servicios.interfaces;
 
-import org.esfe.dtos.usuario.PerfilDTO;
-import org.esfe.dtos.usuario.PerfilCreateDTO;
+import org.esfe.dtos.usuario.PerfilSalidaDto;
+import org.esfe.dtos.usuario.PerfilGuardarDto;
+import org.esfe.dtos.usuario.PerfilModificarDto;
 
 import java.util.List;
 
 public interface IPerfilService {
-    List<PerfilDTO> listarTodos();
-    PerfilDTO obtenerPorId(Integer id);
-    PerfilDTO crear(PerfilCreateDTO dto);
-    PerfilDTO actualizar(Integer id, PerfilCreateDTO dto);
+    List<PerfilSalidaDto> listarTodos();
+    PerfilSalidaDto obtenerPorId(Integer id);
+    PerfilSalidaDto crear(PerfilGuardarDto dto);
+    PerfilSalidaDto actualizar(Integer id, PerfilModificarDto dto);
     void eliminar(Integer id);
-    PerfilDTO obtenerPorUsuarioId(Integer usuarioId);
-    List<PerfilDTO> buscarPorCiudad(String ciudad);
-    List<PerfilDTO> buscarPorPaisYCiudad(String pais, String ciudad);
+    PerfilSalidaDto obtenerPorUsuarioId(Integer usuarioId);
+    List<PerfilSalidaDto> buscarPorCiudad(String ciudad);
+    List<PerfilSalidaDto> buscarPorPaisYCiudad(String pais, String ciudad);
 }

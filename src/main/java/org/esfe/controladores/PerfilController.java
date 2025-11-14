@@ -1,7 +1,8 @@
 package org.esfe.controladores;
 
-import org.esfe.dtos.usuario.PerfilDTO;
-import org.esfe.dtos.usuario.PerfilCreateDTO;
+import org.esfe.dtos.usuario.PerfilSalidaDto;
+import org.esfe.dtos.usuario.PerfilGuardarDto;
+import org.esfe.dtos.usuario.PerfilModificarDto;
 import org.esfe.servicios.interfaces.IPerfilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,23 +23,23 @@ public class PerfilController {
     private IPerfilService perfilService;
 
     @GetMapping
-    public List<PerfilDTO> listarTodos() {
+    public List<PerfilSalidaDto> listarTodos() {
         return perfilService.listarTodos();
     }
 
     @GetMapping("/{id}")
-    public PerfilDTO obtenerPorId(@PathVariable Integer id) {
+    public PerfilSalidaDto obtenerPorId(@PathVariable Integer id) {
         return perfilService.obtenerPorId(id);
     }
 
     @PostMapping
-    public ResponseEntity<PerfilDTO> crear(@Valid @RequestBody PerfilCreateDTO dto) {
-        PerfilDTO created = perfilService.crear(dto);
+    public ResponseEntity<PerfilSalidaDto> crear(@Valid @RequestBody PerfilGuardarDto dto) {
+        PerfilSalidaDto created = perfilService.crear(dto);
         return ResponseEntity.created(URI.create("/perfiles/" + created.getId())).body(created);
     }
 
     @PutMapping("/{id}")
-    public PerfilDTO actualizar(@PathVariable Integer id, @Valid @RequestBody PerfilCreateDTO dto) {
+    public PerfilSalidaDto actualizar(@PathVariable Integer id, @Valid @RequestBody PerfilModificarDto dto) {
         return perfilService.actualizar(id, dto);
     }
 
@@ -50,19 +51,19 @@ public class PerfilController {
 
     // Nuevo: obtener perfil por usuarioId
     @GetMapping("/usuario/{usuarioId}")
-    public PerfilDTO obtenerPorUsuarioId(@PathVariable Integer usuarioId) {
+    public PerfilSalidaDto obtenerPorUsuarioId(@PathVariable Integer usuarioId) {
         return perfilService.obtenerPorUsuarioId(usuarioId);
     }
 
     // Nuevo: buscar por ciudad (case-insensitive)
     @GetMapping("/ciudad/{ciudad}")
-    public List<PerfilDTO> buscarPorCiudad(@PathVariable String ciudad) {
+    public List<PerfilSalidaDto> buscarPorCiudad(@PathVariable String ciudad) {
         return perfilService.buscarPorCiudad(ciudad);
     }
 
     // Nuevo: buscar por país y ciudad
     @GetMapping("/buscar")
-    public List<PerfilDTO> buscarPorPaisYCiudad(@RequestParam String pais, @RequestParam String ciudad) {
+    public List<PerfilSalidaDto> buscarPorPaisYCiudad(@RequestParam String pais, @RequestParam String ciudad) {
         return perfilService.buscarPorPaisYCiudad(pais, ciudad);
     }
 }
