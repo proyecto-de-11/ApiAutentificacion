@@ -36,9 +36,43 @@ public class UsuarioMembresiaService implements IUsuarioMembresiaService {
     private ModelMapper modelMapper;
 
     private UsuarioMembresiaSalidaDto mapToDto(UsuarioMembresia um) {
-        UsuarioMembresiaSalidaDto dto = modelMapper.map(um, UsuarioMembresiaSalidaDto.class);
-        if (um.getUsuario() != null) dto.setUsuarioId(um.getUsuario().getId());
-        if (um.getMembresia() != null) dto.setMembresiaId(um.getMembresia().getId());
+        UsuarioMembresiaSalidaDto dto = new UsuarioMembresiaSalidaDto();
+        dto.setId(um.getId());
+
+        // Mapear usuario completo
+        if (um.getUsuario() != null) {
+            Usuario u = um.getUsuario();
+            UsuarioMembresiaSalidaDto.UsuarioSimpleDto usuarioDto =
+                    new UsuarioMembresiaSalidaDto.UsuarioSimpleDto(
+                            u.getId(),
+                            u.getEmail(),
+                            u.getEstaActivo()
+                    );
+            dto.setUsuario(usuarioDto);
+        }
+
+        // Mapear membresía completa
+        if (um.getMembresia() != null) {
+            Membresia m = um.getMembresia();
+            UsuarioMembresiaSalidaDto.MembresiaSimpleDto membresiaDto =
+                    new UsuarioMembresiaSalidaDto.MembresiaSimpleDto(
+                            m.getId(),
+                            m.getNombre(),
+                            m.getDescripcion(),
+                            m.getPrecioMensual(),
+                            m.getMaxReservasMes(),
+                            m.getDescuentoPorcentaje(),
+                            m.getEstaActivo()
+                    );
+            dto.setMembresia(membresiaDto);
+        }
+
+        dto.setFechaInicio(um.getFechaInicio());
+        dto.setFechaFin(um.getFechaFin());
+        dto.setEstaActiva(um.getEstaActiva());
+        dto.setRenovacionAutomatica(um.getRenovacionAutomatica());
+        dto.setFechaCreacion(um.getFechaCreacion());
+
         return dto;
     }
 
