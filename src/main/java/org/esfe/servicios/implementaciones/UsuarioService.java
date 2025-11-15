@@ -35,7 +35,17 @@ public class UsuarioService implements IUsuarioService {
         UsuarioSalidaDto dto = new UsuarioSalidaDto();
         dto.setId(usuario.getId());
         dto.setEmail(usuario.getEmail());
-        dto.setIdRol(usuario.getRol() != null ? usuario.getRol().getId() : null);
+
+        // CAMBIO: Mapear rol completo
+        if (usuario.getRol() != null) {
+            UsuarioSalidaDto.RolSimpleDto rolDto = new UsuarioSalidaDto.RolSimpleDto(
+                    usuario.getRol().getId(),
+                    usuario.getRol().getNombre(),
+                    usuario.getRol().getDescripcion()
+            );
+            dto.setRol(rolDto);
+        }
+
         dto.setEstaActivo(usuario.getEstaActivo());
         dto.setFechaCreacion(usuario.getFechaCreacion());
         dto.setFechaActualizacion(usuario.getFechaActualizacion());
