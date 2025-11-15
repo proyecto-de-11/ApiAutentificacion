@@ -38,10 +38,36 @@ public class UsuarioAceptacionTerminoService implements IUsuarioAceptacionTermin
 
     private UsuarioAceptacionTerminoSalidaDto mapToDto(UsuarioAceptacionTermino entity) {
         if (entity == null) return null;
+
         UsuarioAceptacionTerminoSalidaDto dto = new UsuarioAceptacionTerminoSalidaDto();
         dto.setId(entity.getId());
-        dto.setIdUsuario(entity.getUsuario() != null ? entity.getUsuario().getId() : null);
-        dto.setIdDocumentoLegal(entity.getDocumentoLegal() != null ? entity.getDocumentoLegal().getId() : null);
+
+        // Mapear usuario completo
+        if (entity.getUsuario() != null) {
+            Usuario u = entity.getUsuario();
+            UsuarioAceptacionTerminoSalidaDto.UsuarioSimpleDto usuarioDto =
+                    new UsuarioAceptacionTerminoSalidaDto.UsuarioSimpleDto(
+                            u.getId(),
+                            u.getEmail()
+                    );
+            dto.setUsuario(usuarioDto);
+        }
+
+        // Mapear documento legal completo
+        if (entity.getDocumentoLegal() != null) {
+            DocumentoLegal doc = entity.getDocumentoLegal();
+            UsuarioAceptacionTerminoSalidaDto.DocumentoLegalSimpleDto docDto =
+                    new UsuarioAceptacionTerminoSalidaDto.DocumentoLegalSimpleDto(
+                            doc.getId(),
+                            doc.getTipo(),
+                            doc.getTitulo(),
+                            doc.getVersion(),
+                            doc.getFechaVigente(),
+                            doc.getEstaActivo()
+                    );
+            dto.setDocumentoLegal(docDto);
+        }
+
         dto.setFechaAceptacion(entity.getFechaAceptacion());
         return dto;
     }
