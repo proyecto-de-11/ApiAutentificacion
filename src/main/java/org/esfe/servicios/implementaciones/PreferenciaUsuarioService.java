@@ -1,8 +1,5 @@
 package org.esfe.servicios.implementaciones;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.esfe.dtos.usuarioMembresias.PreferenciaUsuarioGuardarDTO;
 import org.esfe.dtos.usuarioMembresias.PreferenciaUsuarioModificarDTO;
 import org.esfe.dtos.usuarioMembresias.PreferenciaUsuarioSalidaDTO;
@@ -28,7 +25,6 @@ public class PreferenciaUsuarioService implements IPreferenciaUsuarioService {
     private final IPreferenciaUsuarioRepository preferenciaRepo;
     private final IUsuarioRepository usuarioRepo;
     private final ITiposDeporteRepository tipoDeporteRepo;
-    private final ObjectMapper objectMapper;
 
     public PreferenciaUsuarioService(IPreferenciaUsuarioRepository preferenciaRepo,
                                      IUsuarioRepository usuarioRepo,
@@ -36,7 +32,6 @@ public class PreferenciaUsuarioService implements IPreferenciaUsuarioService {
         this.preferenciaRepo = preferenciaRepo;
         this.usuarioRepo = usuarioRepo;
         this.tipoDeporteRepo = tipoDeporteRepo;
-        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -56,22 +51,14 @@ public class PreferenciaUsuarioService implements IPreferenciaUsuarioService {
             throw new IllegalArgumentException("Debe seleccionar al menos un tipo de deporte");
         }
 
-        // Validar que todos los tipos de deporte existan
-        for (Long tipoId : dto.getTiposDeporteIds()) {
-            if (!tipoDeporteRepo.existsById(tipoId)) {
-                throw new IllegalArgumentException("Tipo de deporte no encontrado con ID: " + tipoId);
-            }
-        }
-
         PreferenciaUsuario ent = new PreferenciaUsuario();
         ent.setUsuario(usuario);
 
-        // Convertir List<Long> a JSON string
-        try {
-            String idsJson = objectMapper.writeValueAsString(dto.getTiposDeporteIds());
-            ent.setTipoDeporteIds(idsJson);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Error al procesar los IDs de tipos de deporte", e);
+        // Agregar los tipos de deporte
+        for (Long tipoId : dto.getTiposDeporteIds()) {
+            TipoDeporte tipo = tipoDeporteRepo.findById(tipoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de deporte no encontrado con ID: " + tipoId));
+            ent.addTipoDeporte(tipo);
         }
 
         mapDtoToEntity(dto, ent);
@@ -85,25 +72,20 @@ public class PreferenciaUsuarioService implements IPreferenciaUsuarioService {
         PreferenciaUsuario ent = preferenciaRepo.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Preferencia no encontrada"));
 
-        // Si se proporcionan nuevos tipos de deporte
+        // Si se proporcionan nuevos tipos de deporte, reemplazar los existentes
         if (dto.getTiposDeporteIds() != null) {
             if (dto.getTiposDeporteIds().isEmpty()) {
                 throw new IllegalArgumentException("Debe seleccionar al menos un tipo de deporte");
             }
 
-            // Validar que todos los tipos de deporte existan
-            for (Long tipoId : dto.getTiposDeporteIds()) {
-                if (!tipoDeporteRepo.existsById(tipoId)) {
-                    throw new IllegalArgumentException("Tipo de deporte no encontrado con ID: " + tipoId);
-                }
-            }
+            // Limpiar los tipos de deporte existentes
+            ent.clearTiposDeporte();
 
-            // Convertir List<Long> a JSON string
-            try {
-                String idsJson = objectMapper.writeValueAsString(dto.getTiposDeporteIds());
-                ent.setTipoDeporteIds(idsJson);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Error al procesar los IDs de tipos de deporte", e);
+            // Agregar los nuevos tipos de deporte
+            for (Long tipoId : dto.getTiposDeporteIds()) {
+                TipoDeporte tipo = tipoDeporteRepo.findById(tipoId)
+                        .orElseThrow(() -> new IllegalArgumentException("Tipo de deporte no encontrado con ID: " + tipoId));
+                ent.addTipoDeporte(tipo);
             }
         }
 
@@ -152,31 +134,18 @@ public class PreferenciaUsuarioService implements IPreferenciaUsuarioService {
             s.setUsuarioId(e.getUsuario().getId());
         }
 
-        // Convertir JSON string a List<Long> y luego buscar los TipoDeporte
-        if (e.getTipoDeporteIds() != null && !e.getTipoDeporteIds().isEmpty()) {
-            try {
-                List<Long> ids = objectMapper.readValue(e.getTipoDeporteIds(), new TypeReference<List<Long>>(){});
-
-                // Buscar cada TipoDeporte por su ID
-                List<PreferenciaUsuarioSalidaDTO.TipoDeporteSimpleDTO> tiposDto = new ArrayList<>();
-                for (Long id : ids) {
-                    Optional<TipoDeporte> tdOpt = tipoDeporteRepo.findById(id);
-                    if (tdOpt.isPresent()) {
-                        TipoDeporte td = tdOpt.get();
-                        tiposDto.add(new PreferenciaUsuarioSalidaDTO.TipoDeporteSimpleDTO(
-                                td.getId(),
-                                td.getNombre(),
-                                td.getIcono()
-                        ));
-                    }
-                }
-                s.setTiposDeporte(tiposDto);
-
-            } catch (JsonProcessingException ex) {
-                // En caso de error, retornar lista vacía
-                s.setTiposDeporte(new ArrayList<>());
-            }
-        }
+        // Mapear tipos de deporte desde la relación Many-to-Many
+        List<PreferenciaUsuarioSalidaDTO.TipoDeporteSimpleDTO> tiposDto = e.getTiposDeporte().stream()
+                .map(rel -> {
+                    TipoDeporte td = rel.getTipoDeporte();
+                    return new PreferenciaUsuarioSalidaDTO.TipoDeporteSimpleDTO(
+                            td.getId(),
+                            td.getNombre(),
+                            td.getIcono()
+                    );
+                })
+                .collect(Collectors.toList());
+        s.setTiposDeporte(tiposDto);
 
         s.setNivelJuego(e.getNivelJuego());
         s.setPosicionPreferida(e.getPosicionPreferida());
@@ -196,7 +165,7 @@ public class PreferenciaUsuarioService implements IPreferenciaUsuarioService {
         return s;
     }
 
-    // Mapeo de DTO a Entity (solo campos comunes, no tiposDeporteIds)
+    // Mapeo de DTO a Entity (solo campos comunes)
     private void mapDtoToEntity(Object dtoObj, PreferenciaUsuario ent) {
         if (dtoObj instanceof PreferenciaUsuarioGuardarDTO) {
             PreferenciaUsuarioGuardarDTO dto = (PreferenciaUsuarioGuardarDTO) dtoObj;
@@ -229,4 +198,3 @@ public class PreferenciaUsuarioService implements IPreferenciaUsuarioService {
         }
     }
 }
-

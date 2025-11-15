@@ -3,6 +3,8 @@ package org.esfe.modelos;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "preferencia_usuario")
@@ -12,14 +14,13 @@ public class PreferenciaUsuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Mantener OneToOne con Usuario
     @OneToOne
     @JoinColumn(name = "usuario_id", referencedColumnName = "id", unique = true)
     private Usuario usuario;
 
-    // CAMBIO: Guardar los IDs como JSON/TEXT
-    @Column(name = "tipo_deporte_id", columnDefinition = "JSON")
-    private String tipoDeporteIds; // Guardará: "[1,2,4,6]"
+    // CAMBIO: Relación Many-to-Many con TipoDeporte
+    @OneToMany(mappedBy = "preferenciaUsuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PreferenciaUsuarioTipoDeporte> tiposDeporte = new ArrayList<>();
 
     @Column(name = "nivel_juego")
     private String nivelJuego;
@@ -74,7 +75,23 @@ public class PreferenciaUsuario {
         this.fechaActualizado = LocalDateTime.now();
     }
 
-    // Getters y setters
+    // Métodos helper para manejar la relación bidireccional
+    public void addTipoDeporte(TipoDeporte tipoDeporte) {
+        PreferenciaUsuarioTipoDeporte relacion = new PreferenciaUsuarioTipoDeporte();
+        relacion.setPreferenciaUsuario(this);
+        relacion.setTipoDeporte(tipoDeporte);
+        this.tiposDeporte.add(relacion);
+    }
+
+    public void removeTipoDeporte(TipoDeporte tipoDeporte) {
+        this.tiposDeporte.removeIf(rel -> rel.getTipoDeporte().getId().equals(tipoDeporte.getId()));
+    }
+
+    public void clearTiposDeporte() {
+        this.tiposDeporte.clear();
+    }
+
+    // Getters y Setters
     public Integer getId() {
         return id;
     }
@@ -91,12 +108,12 @@ public class PreferenciaUsuario {
         this.usuario = usuario;
     }
 
-    public String getTipoDeporteIds() {
-        return tipoDeporteIds;
+    public List<PreferenciaUsuarioTipoDeporte> getTiposDeporte() {
+        return tiposDeporte;
     }
 
-    public void setTipoDeporteIds(String tipoDeporteIds) {
-        this.tipoDeporteIds = tipoDeporteIds;
+    public void setTiposDeporte(List<PreferenciaUsuarioTipoDeporte> tiposDeporte) {
+        this.tiposDeporte = tiposDeporte;
     }
 
     public String getNivelJuego() {
