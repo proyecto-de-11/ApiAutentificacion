@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public class PerfilSalidaDto {
     private Integer id;
-    private Integer usuarioId;
+    private UsuarioSimpleDto usuario; // CAMBIO: de Integer usuarioId a objeto
     private String nombreCompleto;
     private String telefono;
     private String documentoIdentidad;
@@ -18,12 +18,33 @@ public class PerfilSalidaDto {
     private LocalDateTime fechaGuardado;
     private LocalDateTime fechaActualizacion;
 
+    public static class UsuarioSimpleDto {
+        private Integer id;
+        private String email;
+        private Boolean estaActivo;
+
+        public UsuarioSimpleDto() {}
+
+        public UsuarioSimpleDto(Integer id, String email, Boolean estaActivo) {
+            this.id = id;
+            this.email = email;
+            this.estaActivo = estaActivo;
+        }
+
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public Boolean getEstaActivo() { return estaActivo; }
+        public void setEstaActivo(Boolean estaActivo) { this.estaActivo = estaActivo; }
+    }
+
     // Getters y setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public Integer getUsuarioId() { return usuarioId; }
-    public void setUsuarioId(Integer usuarioId) { this.usuarioId = usuarioId; }
+    public UsuarioSimpleDto getUsuario() { return usuario; }
+    public void setUsuario(UsuarioSimpleDto usuario) { this.usuario = usuario; }
 
     public String getNombreCompleto() { return nombreCompleto; }
     public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
@@ -58,4 +79,3 @@ public class PerfilSalidaDto {
     public LocalDateTime getFechaActualizacion() { return fechaActualizacion; }
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) { this.fechaActualizacion = fechaActualizacion; }
 }
-

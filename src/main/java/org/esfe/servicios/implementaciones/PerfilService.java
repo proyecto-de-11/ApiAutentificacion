@@ -145,10 +145,33 @@ public class PerfilService implements IPerfilService {
     }
 
     private PerfilSalidaDto convertToDto(Perfil perfil) {
-        PerfilSalidaDto dto = modelMapper.map(perfil, PerfilSalidaDto.class);
+        PerfilSalidaDto dto = new PerfilSalidaDto();
+        dto.setId(perfil.getId());
+
+        // Mapear usuario completo
         if (perfil.getUsuario() != null) {
-            dto.setUsuarioId(perfil.getUsuario().getId());
+            Usuario u = perfil.getUsuario();
+            PerfilSalidaDto.UsuarioSimpleDto usuarioDto =
+                    new PerfilSalidaDto.UsuarioSimpleDto(
+                            u.getId(),
+                            u.getEmail(),
+                            u.getEstaActivo()
+                    );
+            dto.setUsuario(usuarioDto);
         }
+
+        dto.setNombreCompleto(perfil.getNombreCompleto());
+        dto.setTelefono(perfil.getTelefono());
+        dto.setDocumentoIdentidad(perfil.getDocumentoIdentidad());
+        dto.setFechaNacimiento(perfil.getFechaNacimiento());
+        dto.setGenero(perfil.getGenero());
+        dto.setFotoPerfil(perfil.getFotoPerfil());
+        dto.setBiografia(perfil.getBiografia());
+        dto.setCiudad(perfil.getCiudad());
+        dto.setPais(perfil.getPais());
+        dto.setFechaGuardado(perfil.getFechaGuardado());
+        dto.setFechaActualizacion(perfil.getFechaActualizacion());
+
         return dto;
     }
 }
