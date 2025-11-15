@@ -5,13 +5,13 @@ import jakarta.validation.constraints.NotNull;
 
 public class UsuarioMembresiaGuardarDto {
 
-    @NotNull
+    @NotNull(message = "El ID del usuario es requerido")
     private Integer usuarioId;
 
-    @NotNull
+    @NotNull(message = "El ID de la membresía es requerido")
     private Integer membresiaId;
 
-    @NotNull
+    // fechaInicio ahora es opcional, se generará automáticamente si no se proporciona
     private LocalDate fechaInicio;
 
     private LocalDate fechaFin;
@@ -59,4 +59,3 @@ public class UsuarioMembresiaGuardarDto {
         this.renovacionAutomatica = renovacionAutomatica;
     }
 }
-

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,8 +56,21 @@ public class PerfilService implements IPerfilService {
 
         Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-        Perfil perfil = modelMapper.map(dto, Perfil.class);
+
+        Perfil perfil = new Perfil();
+        // Asegurar que el id sea null para crear un nuevo registro
+        perfil.setId(null);
         perfil.setUsuario(usuario);
+        perfil.setNombreCompleto(dto.getNombreCompleto());
+        perfil.setTelefono(dto.getTelefono());
+        perfil.setDocumentoIdentidad(dto.getDocumentoIdentidad());
+        perfil.setFechaNacimiento(dto.getFechaNacimiento());
+        perfil.setGenero(dto.getGenero());
+        perfil.setFotoPerfil(dto.getFotoPerfil());
+        perfil.setBiografia(dto.getBiografia());
+        perfil.setCiudad(dto.getCiudad());
+        perfil.setPais(dto.getPais());
+
         Perfil saved = perfilRepository.save(perfil);
         return convertToDto(saved);
     }
@@ -65,6 +79,9 @@ public class PerfilService implements IPerfilService {
     public PerfilSalidaDto actualizar(Integer id, PerfilModificarDto dto) {
         Perfil perfil = perfilRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil no encontrado"));
+
+        // Guardar la fecha original de creación para no modificarla
+        LocalDateTime fechaGuardadoOriginal = perfil.getFechaGuardado();
 
         // mapear campos no nulos del DTO al entity
         if (dto.getNombreCompleto() != null) perfil.setNombreCompleto(dto.getNombreCompleto());
@@ -88,7 +105,12 @@ public class PerfilService implements IPerfilService {
             perfil.setUsuario(usuario);
         }
 
+        // Restaurar la fecha original de creación y actualizar la fecha de modificación
+        perfil.setFechaGuardado(fechaGuardadoOriginal);
+        perfil.setFechaActualizacion(LocalDateTime.now());
+
         Perfil updated = perfilRepository.save(perfil);
+        perfilRepository.flush(); // Forzar la escritura inmediata a la BD
         return convertToDto(updated);
     }
 

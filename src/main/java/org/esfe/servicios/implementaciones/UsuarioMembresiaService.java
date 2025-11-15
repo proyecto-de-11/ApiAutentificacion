@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -69,7 +70,13 @@ public class UsuarioMembresiaService implements IUsuarioMembresiaService {
         m.setId(dto.getMembresiaId());
         um.setMembresia(m);
 
-        um.setFechaInicio(dto.getFechaInicio());
+        // Si no se proporciona fechaInicio, usar la fecha actual
+        if (dto.getFechaInicio() != null) {
+            um.setFechaInicio(dto.getFechaInicio());
+        } else {
+            um.setFechaInicio(LocalDate.now());
+        }
+
         um.setFechaFin(dto.getFechaFin());
         um.setRenovacionAutomatica(dto.getRenovacionAutomatica() != null ? dto.getRenovacionAutomatica() : false);
         um.setEstaActiva(true);
