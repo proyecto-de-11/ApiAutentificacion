@@ -37,8 +37,10 @@ public class PreferenciaUsuarioController {
         return ResponseEntity.created(location).body(salida);
     }
 
-    @PutMapping
-    public ResponseEntity<PreferenciaUsuarioSalidaDTO> modificar(@Valid @RequestBody PreferenciaUsuarioModificarDTO dto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PreferenciaUsuarioSalidaDTO> modificar(@PathVariable Integer id, @Valid @RequestBody PreferenciaUsuarioModificarDTO dto) {
+        // Aseguramos que el id venga por la ruta y lo asignamos al DTO antes de modificar
+        dto.setId(id);
         PreferenciaUsuarioSalidaDTO salida = service.modificar(dto);
         return ResponseEntity.ok(salida);
     }

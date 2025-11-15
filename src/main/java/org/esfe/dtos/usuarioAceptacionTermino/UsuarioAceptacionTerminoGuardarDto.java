@@ -2,7 +2,6 @@ package org.esfe.dtos.usuarioAceptacionTermino;
 
 import java.io.Serializable;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class UsuarioAceptacionTerminoGuardarDto implements Serializable {
@@ -13,8 +12,7 @@ public class UsuarioAceptacionTerminoGuardarDto implements Serializable {
     @NotNull(message = "El id del documento legal es obligatorio.")
     private Integer idDocumentoLegal;
 
-    @NotNull(message = "La fecha de aceptación es obligatoria.")
-    @NotBlank(message = "La fecha de aceptación no puede estar en blanco.")
+    // La fecha de aceptación la asigna el servidor al crear; no debe ser obligatoria en el DTO de guardado.
     private String fechaAceptacion;
 
     public Integer getIdUsuario() {
@@ -41,4 +39,3 @@ public class UsuarioAceptacionTerminoGuardarDto implements Serializable {
         this.fechaAceptacion = fechaAceptacion;
     }
 }
-

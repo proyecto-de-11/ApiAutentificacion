@@ -3,7 +3,6 @@ package org.esfe.dtos.usuarioAceptacionTermino;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class UsuarioAceptacionTerminoModificarDto implements Serializable {
@@ -18,8 +17,7 @@ public class UsuarioAceptacionTerminoModificarDto implements Serializable {
     @NotNull(message = "El id del documento legal es obligatorio.")
     private Integer idDocumentoLegal;
 
-    @NotNull(message = "La fecha de aceptación es obligatoria.")
-    @NotBlank(message = "La fecha de aceptación no puede estar en blanco.")
+    // La fecha de aceptación es opcional en la modificación; si no viene, se mantiene la existente.
     private String fechaAceptacion;
 
     public Integer getId() {
@@ -54,4 +52,3 @@ public class UsuarioAceptacionTerminoModificarDto implements Serializable {
         this.fechaAceptacion = fechaAceptacion;
     }
 }
-

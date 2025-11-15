@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -65,7 +67,9 @@ public class UsuarioAceptacionTerminoService implements IUsuarioAceptacionTermin
         UsuarioAceptacionTermino entity = new UsuarioAceptacionTermino();
         entity.setUsuario(usuario);
         entity.setDocumentoLegal(documento);
-        entity.setFechaAceptacion(dto.getFechaAceptacion());
+        // Asignar la fecha y hora actual al crear el registro (formato compatible con DATETIME)
+        String ahora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        entity.setFechaAceptacion(ahora);
 
         UsuarioAceptacionTermino guardado = repo.save(entity);
         return mapToDto(guardado);
@@ -84,7 +88,10 @@ public class UsuarioAceptacionTerminoService implements IUsuarioAceptacionTermin
 
         existente.setUsuario(usuario);
         existente.setDocumentoLegal(documento);
-        existente.setFechaAceptacion(dto.getFechaAceptacion());
+        // Actualizar fechaAceptacion solo si se proporciona en el DTO
+        if (dto.getFechaAceptacion() != null && !dto.getFechaAceptacion().isBlank()) {
+            existente.setFechaAceptacion(dto.getFechaAceptacion());
+        }
 
         UsuarioAceptacionTermino actualizado = repo.save(existente);
         return mapToDto(actualizado);
@@ -116,4 +123,3 @@ public class UsuarioAceptacionTerminoService implements IUsuarioAceptacionTermin
         return page.map(this::mapToDto);
     }
 }
-
