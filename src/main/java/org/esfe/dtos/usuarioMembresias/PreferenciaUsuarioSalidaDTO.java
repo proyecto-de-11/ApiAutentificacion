@@ -2,16 +2,17 @@ package org.esfe.dtos.usuarioMembresias;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 public class PreferenciaUsuarioSalidaDTO {
     private Integer id;
     private Integer usuarioId;
-    private Long tipoDeporteId;
+    private List<TipoDeporteSimpleDTO> tiposDeporte;
     private String nivelJuego;
     private String posicionPreferida;
     private LocalTime horarioPreferidoInicio;
     private LocalTime horarioPreferidoFin;
-    private String diasPreferidos; // JSON string
+    private String diasPreferidos;
     private String ciudadPreferida;
     private Integer radiosDistanciaKm;
     private Boolean notificacionesEmail;
@@ -21,6 +22,46 @@ public class PreferenciaUsuarioSalidaDTO {
     private Boolean notificacionesInvitaciones;
     private LocalDateTime fechaGuardado;
     private LocalDateTime fechaActualizado;
+
+    // Clase interna para información de TipoDeporte
+    public static class TipoDeporteSimpleDTO {
+        private Long id;
+        private String nombre;
+        private String icono;
+
+        public TipoDeporteSimpleDTO() {}
+
+        public TipoDeporteSimpleDTO(Long id, String nombre, String icono) {
+            this.id = id;
+            this.nombre = nombre;
+            this.icono = icono;
+        }
+
+        // Getters y setters
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getNombre() {
+            return nombre;
+        }
+
+        public void setNombre(String nombre) {
+            this.nombre = nombre;
+        }
+
+        public String getIcono() {
+            return icono;
+        }
+
+        public void setIcono(String icono) {
+            this.icono = icono;
+        }
+    }
 
     // Getters y setters
     public Integer getId() {
@@ -39,12 +80,12 @@ public class PreferenciaUsuarioSalidaDTO {
         this.usuarioId = usuarioId;
     }
 
-    public Long getTipoDeporteId() {
-        return tipoDeporteId;
+    public List<TipoDeporteSimpleDTO> getTiposDeporte() {
+        return tiposDeporte;
     }
 
-    public void setTipoDeporteId(Long tipoDeporteId) {
-        this.tipoDeporteId = tipoDeporteId;
+    public void setTiposDeporte(List<TipoDeporteSimpleDTO> tiposDeporte) {
+        this.tiposDeporte = tiposDeporte;
     }
 
     public String getNivelJuego() {

@@ -1,15 +1,22 @@
 package org.esfe.dtos.usuarioMembresias;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
+import java.util.List;
 
 public class PreferenciaUsuarioGuardarDTO {
+
+    @NotNull(message = "El usuarioId es obligatorio")
     private Integer usuarioId;
-    private Long tipoDeporteId;
+
+    @NotNull(message = "Debe seleccionar al menos un tipo de deporte")
+    private List<Long> tiposDeporteIds;
+
     private String nivelJuego;
     private String posicionPreferida;
     private LocalTime horarioPreferidoInicio;
     private LocalTime horarioPreferidoFin;
-    private String diasPreferidos; // JSON string
+    private String diasPreferidos;
     private String ciudadPreferida;
     private Integer radiosDistanciaKm;
     private Boolean notificacionesEmail;
@@ -27,12 +34,12 @@ public class PreferenciaUsuarioGuardarDTO {
         this.usuarioId = usuarioId;
     }
 
-    public Long getTipoDeporteId() {
-        return tipoDeporteId;
+    public List<Long> getTiposDeporteIds() {
+        return tiposDeporteIds;
     }
 
-    public void setTipoDeporteId(Long tipoDeporteId) {
-        this.tipoDeporteId = tipoDeporteId;
+    public void setTiposDeporteIds(List<Long> tiposDeporteIds) {
+        this.tiposDeporteIds = tiposDeporteIds;
     }
 
     public String getNivelJuego() {

@@ -12,13 +12,14 @@ public class PreferenciaUsuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // Mantener OneToOne con Usuario
     @OneToOne
-    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id", unique = true)
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "tipo_deporte_id")
-    private TipoDeporte tipoDeporte;
+    // CAMBIO: Guardar los IDs como JSON/TEXT
+    @Column(name = "tipo_deporte_id", columnDefinition = "JSON")
+    private String tipoDeporteIds; // Guardará: "[1,2,4,6]"
 
     @Column(name = "nivel_juego")
     private String nivelJuego;
@@ -32,7 +33,6 @@ public class PreferenciaUsuario {
     @Column(name = "horario_preferido_fin")
     private LocalTime horarioPreferidoFin;
 
-    // Guardamos el JSON como texto; puede ser un array de días, por ejemplo: ["Lunes","Miércoles"]
     @Column(name = "dias_preferidos", columnDefinition = "text")
     private String diasPreferidos;
 
@@ -91,12 +91,12 @@ public class PreferenciaUsuario {
         this.usuario = usuario;
     }
 
-    public TipoDeporte getTipoDeporte() {
-        return tipoDeporte;
+    public String getTipoDeporteIds() {
+        return tipoDeporteIds;
     }
 
-    public void setTipoDeporte(TipoDeporte tipoDeporte) {
-        this.tipoDeporte = tipoDeporte;
+    public void setTipoDeporteIds(String tipoDeporteIds) {
+        this.tipoDeporteIds = tipoDeporteIds;
     }
 
     public String getNivelJuego() {
