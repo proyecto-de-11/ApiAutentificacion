@@ -7,17 +7,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IUsuarioAceptacionTerminoRepository extends JpaRepository<UsuarioAceptacionTermino, Integer> {
 
-    List<UsuarioAceptacionTermino> findByUsuario_Id(Integer idUsuario);
+    Optional<UsuarioAceptacionTermino> findByUsuario_Id(Integer idUsuario);
 
-    List<UsuarioAceptacionTermino> findByDocumentoLegal_Id(Integer idDocumentoLegal);
+    List<UsuarioAceptacionTermino> findByDocumentosAceptados_DocumentoLegal_Id(Integer idDocumentoLegal);
 
     Page<UsuarioAceptacionTermino> findByUsuario_Id(Integer idUsuario, Pageable pageable);
 
-    Page<UsuarioAceptacionTermino> findByDocumentoLegal_Id(Integer idDocumentoLegal, Pageable pageable);
+    Page<UsuarioAceptacionTermino> findByDocumentosAceptados_DocumentoLegal_Id(Integer idDocumentoLegal, Pageable pageable);
 
 }
-

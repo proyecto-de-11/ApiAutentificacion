@@ -1,7 +1,7 @@
 package org.esfe.dtos.usuarioAceptacionTermino;
 
 import java.io.Serializable;
-
+import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
 public class UsuarioAceptacionTerminoGuardarDto implements Serializable {
@@ -9,12 +9,12 @@ public class UsuarioAceptacionTerminoGuardarDto implements Serializable {
     @NotNull(message = "El id del usuario es obligatorio.")
     private Integer idUsuario;
 
-    @NotNull(message = "El id del documento legal es obligatorio.")
-    private Integer idDocumentoLegal;
+    @NotNull(message = "Debe seleccionar al menos un documento legal.")
+    private List<Integer> idsDocumentosLegales; // CAMBIO: Lista de IDs
 
-    // La fecha de aceptación la asigna el servidor al crear; no debe ser obligatoria en el DTO de guardado.
-    private String fechaAceptacion;
+    private String ipAddress; // Opcional: para registrar la IP del usuario
 
+    // Getters y setters
     public Integer getIdUsuario() {
         return idUsuario;
     }
@@ -23,19 +23,19 @@ public class UsuarioAceptacionTerminoGuardarDto implements Serializable {
         this.idUsuario = idUsuario;
     }
 
-    public Integer getIdDocumentoLegal() {
-        return idDocumentoLegal;
+    public List<Integer> getIdsDocumentosLegales() {
+        return idsDocumentosLegales;
     }
 
-    public void setIdDocumentoLegal(Integer idDocumentoLegal) {
-        this.idDocumentoLegal = idDocumentoLegal;
+    public void setIdsDocumentosLegales(List<Integer> idsDocumentosLegales) {
+        this.idsDocumentosLegales = idsDocumentosLegales;
     }
 
-    public String getFechaAceptacion() {
-        return fechaAceptacion;
+    public String getIpAddress() {
+        return ipAddress;
     }
 
-    public void setFechaAceptacion(String fechaAceptacion) {
-        this.fechaAceptacion = fechaAceptacion;
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 }

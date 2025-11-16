@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -43,8 +44,14 @@ public class UsuarioAceptacionTerminoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody UsuarioAceptacionTerminoGuardarDto dto) {
+    public ResponseEntity<?> crear(
+            @Valid @RequestBody UsuarioAceptacionTerminoGuardarDto dto,
+            HttpServletRequest request) { // AGREGAR ESTE PARÁMETRO
         try {
+            // Capturar IP automáticamente
+            String ipAddress = getClientIP(request);
+            dto.setIpAddress(ipAddress);
+
             UsuarioAceptacionTerminoSalidaDto creado = service.crear(dto);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
@@ -53,19 +60,31 @@ public class UsuarioAceptacionTerminoController {
             return ResponseEntity.created(location).body(creado);
         } catch (NoSuchElementException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> editar(@PathVariable Integer id, @Valid @RequestBody UsuarioAceptacionTerminoModificarDto dto) {
+    public ResponseEntity<?> editar(
+            @PathVariable Integer id,
+            @Valid @RequestBody UsuarioAceptacionTerminoModificarDto dto,
+            HttpServletRequest request) { // AGREGAR ESTE PARÁMETRO
         try {
             if (dto.getId() == null) dto.setId(id);
-            else if (!dto.getId().equals(id)) return ResponseEntity.badRequest().body("El ID en la ruta no coincide con el ID en el cuerpo.");
+            else if (!dto.getId().equals(id))
+                return ResponseEntity.badRequest().body("El ID en la ruta no coincide con el ID en el cuerpo.");
+
+            // Capturar IP automáticamente
+            String ipAddress = getClientIP(request);
+            dto.setIpAddress(ipAddress);
 
             UsuarioAceptacionTerminoSalidaDto actualizado = service.editar(dto);
             return ResponseEntity.ok(actualizado);
         } catch (NoSuchElementException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
         }
     }
 
@@ -85,9 +104,19 @@ public class UsuarioAceptacionTerminoController {
             @RequestParam(name = "idDocumentoLegal", required = false) Integer idDocumentoLegal,
             Pageable pageable) {
 
-        Page<UsuarioAceptacionTerminoSalidaDto> page = service.obtenerPaginadoYFiltrado(Optional.ofNullable(idUsuario), Optional.ofNullable(idDocumentoLegal), pageable);
+        Page<UsuarioAceptacionTerminoSalidaDto> page = service.obtenerPaginadoYFiltrado(
+                Optional.ofNullable(idUsuario),
+                Optional.ofNullable(idDocumentoLegal),
+                pageable);
         return ResponseEntity.ok(page);
     }
 
+    // Método helper para obtener la IP del cliente
+    private String getClientIP(HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null || xfHeader.isEmpty() || "unknown".equalsIgnoreCase(xfHeader)) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0].trim();
+    }
 }
-

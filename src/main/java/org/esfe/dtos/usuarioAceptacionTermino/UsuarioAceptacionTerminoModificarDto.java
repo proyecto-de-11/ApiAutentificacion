@@ -1,7 +1,7 @@
 package org.esfe.dtos.usuarioAceptacionTermino;
 
 import java.io.Serializable;
-
+import java.util.List;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -11,15 +11,11 @@ public class UsuarioAceptacionTerminoModificarDto implements Serializable {
     @Min(value = 1, message = "El id debe ser positivo.")
     private Integer id;
 
-    @NotNull(message = "El id del usuario es obligatorio.")
-    private Integer idUsuario;
+    private List<Integer> idsDocumentosLegales; // Lista de IDs de documentos a agregar/reemplazar
 
-    @NotNull(message = "El id del documento legal es obligatorio.")
-    private Integer idDocumentoLegal;
+    private String ipAddress;
 
-    // La fecha de aceptación es opcional en la modificación; si no viene, se mantiene la existente.
-    private String fechaAceptacion;
-
+    // Getters y setters
     public Integer getId() {
         return id;
     }
@@ -28,27 +24,19 @@ public class UsuarioAceptacionTerminoModificarDto implements Serializable {
         this.id = id;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
+    public List<Integer> getIdsDocumentosLegales() {
+        return idsDocumentosLegales;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setIdsDocumentosLegales(List<Integer> idsDocumentosLegales) {
+        this.idsDocumentosLegales = idsDocumentosLegales;
     }
 
-    public Integer getIdDocumentoLegal() {
-        return idDocumentoLegal;
+    public String getIpAddress() {
+        return ipAddress;
     }
 
-    public void setIdDocumentoLegal(Integer idDocumentoLegal) {
-        this.idDocumentoLegal = idDocumentoLegal;
-    }
-
-    public String getFechaAceptacion() {
-        return fechaAceptacion;
-    }
-
-    public void setFechaAceptacion(String fechaAceptacion) {
-        this.fechaAceptacion = fechaAceptacion;
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 }
