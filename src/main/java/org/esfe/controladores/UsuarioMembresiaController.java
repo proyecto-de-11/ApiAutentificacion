@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -28,18 +30,23 @@ public class UsuarioMembresiaController {
         return ResponseEntity.ok(page);
     }
 
+    // ✅ Listar todos: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/lista")
     public ResponseEntity<List<UsuarioMembresiaSalidaDto>> mostrarTodos() {
         List<UsuarioMembresiaSalidaDto> lista = usuarioMembresiaService.obtenerTodos();
         if (!lista.isEmpty()) return ResponseEntity.ok(lista);
         return ResponseEntity.notFound().build();
     }
-
+    // ✅ Listar todos: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioMembresiaSalidaDto> buscarPorId(@PathVariable Integer id) {
         return usuarioMembresiaService.obtenerPorId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // ✅ Listar todos: Solo ADMIN y el propio usuario
+    @PreAuthorize("hasRole('ADMINISTRADOR' or @securityService.isOwnerOfUsuarioMembresia(#id, authentication))")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody UsuarioMembresiaGuardarDto dto) {
         try {
@@ -52,6 +59,8 @@ public class UsuarioMembresiaController {
         }
     }
 
+    // ✅ Listar todos: Solo ADMIN y el propio usuario
+    @PreAuthorize("hasRole('ADMINISTRADOR' or @securityService.isOwnerOfUsuarioMembresia(#id, authentication))")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id, @Valid @RequestBody UsuarioMembresiaModificarDto dto) {
         try {
@@ -67,6 +76,8 @@ public class UsuarioMembresiaController {
         }
     }
 
+    // ✅ Listar todos: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         try {
