@@ -31,14 +31,19 @@ public class PreferenciaUsuarioController {
         this.service = service;
     }
 
-    // ✅ Crear: Usuario solo puede crear sus propias preferencias
-    @PreAuthorize("isAuthenticated()")
+    // ✅ Crear: PROPIETARIO y USUARIO pueden crear sus propias preferencias
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROPIETARIO', 'USUARIO')")
     @PostMapping
     public ResponseEntity<PreferenciaUsuarioSalidaDTO> guardar(@Valid @RequestBody PreferenciaUsuarioGuardarDTO dto,
                                                                Authentication authentication) {
         // Verificar que el usuario solo pueda crear sus propias preferencias
         org.esfe.modelos.Usuario usuario = (org.esfe.modelos.Usuario) authentication.getPrincipal();
-        if (!dto.getUsuarioId().equals(usuario.getId())) {
+
+        // ADMIN puede crear para cualquiera, otros solo para sí mismos
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+
+        if (!isAdmin && !dto.getUsuarioId().equals(usuario.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -48,7 +53,7 @@ public class PreferenciaUsuarioController {
         return ResponseEntity.created(location).body(salida);
     }
 
-    // ✅ Modificar: ADMIN o el mismo usuario
+    // ✅ Modificar: ADMIN o el mismo usuario (PROPIETARIO incluido)
     @PreAuthorize("hasRole('ADMINISTRADOR') or @preferenciasSecurity.isOwner(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<PreferenciaUsuarioSalidaDTO> modificar(@PathVariable Integer id,
@@ -58,7 +63,7 @@ public class PreferenciaUsuarioController {
         return ResponseEntity.ok(salida);
     }
 
-    // ✅ Obtener por ID: ADMIN o el mismo usuario
+    // ✅ Obtener por ID: ADMIN o el mismo usuario (PROPIETARIO incluido)
     @PreAuthorize("hasRole('ADMINISTRADOR') or @preferenciasSecurity.isOwner(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<PreferenciaUsuarioSalidaDTO> obtenerPorId(@PathVariable Integer id) {
@@ -67,8 +72,7 @@ public class PreferenciaUsuarioController {
     }
 
     // ✅ Obtener por usuario: ADMIN o el mismo usuario
-    //or #usuarioId == authentication.principal.id
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or #usuarioId == authentication.principal.id")
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<PreferenciaUsuarioSalidaDTO> obtenerPorUsuario(@PathVariable Integer usuarioId) {
         PreferenciaUsuarioSalidaDTO salida = service.obtenerPorUsuarioId(usuarioId);
@@ -83,8 +87,7 @@ public class PreferenciaUsuarioController {
         return ResponseEntity.ok(lista);
     }
 
-    // ✅ Eliminar: ADMIN
-    // or @preferenciasSecurity.isOwner(#id, authentication)
+    // ✅ Eliminar: Solo ADMIN (PROPIETARIO NO puede eliminar)
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
