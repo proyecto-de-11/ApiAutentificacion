@@ -31,21 +31,26 @@ public class PerfilController {
         return perfilService.listarTodos();
     }
 
-    // ✅ Ver por ID: ADMIN o el mismo usuario
+    // ✅ Ver por ID: ADMIN o el mismo usuario (incluyendo PROPIETARIO)
     @PreAuthorize("hasRole('ADMINISTRADOR') or @perfilSecurity.isOwner(#id, authentication)")
     @GetMapping("/{id}")
     public PerfilSalidaDto obtenerPorId(@PathVariable Integer id) {
         return perfilService.obtenerPorId(id);
     }
 
-    // ✅ Crear: Usuario autenticado crea su propio perfil
-    @PreAuthorize("isAuthenticated()")
+    // ✅ Crear: Usuario autenticado crea su propio perfil (PROPIETARIO incluido)
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROPIETARIO', 'USUARIO')")
     @PostMapping
     public ResponseEntity<PerfilSalidaDto> crear(@Valid @RequestBody PerfilGuardarDto dto,
                                                  Authentication authentication) {
         // Verificar que el usuario solo pueda crear su propio perfil
         org.esfe.modelos.Usuario usuario = (org.esfe.modelos.Usuario) authentication.getPrincipal();
-        if (!dto.getUsuarioId().equals(usuario.getId())) {
+
+        // ADMIN puede crear perfiles para cualquiera, otros solo para sí mismos
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+
+        if (!isAdmin && !dto.getUsuarioId().equals(usuario.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -53,7 +58,7 @@ public class PerfilController {
         return ResponseEntity.created(URI.create("/perfiles/" + created.getId())).body(created);
     }
 
-    // ✅ Actualizar: ADMIN o el mismo usuario
+    // ✅ Actualizar: ADMIN o el mismo usuario (PROPIETARIO incluido)
     @PreAuthorize("hasRole('ADMINISTRADOR') or @perfilSecurity.isOwner(#id, authentication)")
     @PutMapping("/{id}")
     public PerfilSalidaDto actualizar(@PathVariable Integer id,
@@ -61,7 +66,7 @@ public class PerfilController {
         return perfilService.actualizar(id, dto);
     }
 
-    // ✅ Eliminar: Solo ADMIN
+    // ✅ Eliminar: Solo ADMIN (PROPIETARIO NO puede eliminar)
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -70,21 +75,19 @@ public class PerfilController {
     }
 
     // ✅ Obtener por usuario: ADMIN o el mismo usuario
-    // or #usuarioId == authentication.principal.id"
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or #usuarioId == authentication.principal.id")
     @GetMapping("/usuario/{usuarioId}")
     public PerfilSalidaDto obtenerPorUsuarioId(@PathVariable Integer usuarioId) {
         return perfilService.obtenerPorUsuarioId(usuarioId);
     }
 
-    // ✅ Obtener por usuario: ADMIN
+    // ✅ Búsquedas: Solo ADMIN
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/ciudad/{ciudad}")
     public List<PerfilSalidaDto> buscarPorCiudad(@PathVariable String ciudad) {
         return perfilService.buscarPorCiudad(ciudad);
     }
 
-    // ✅ Obtener por usuario: ADMIN
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/buscar")
     public List<PerfilSalidaDto> buscarPorPaisYCiudad(@RequestParam String pais, @RequestParam String ciudad) {
