@@ -4,10 +4,12 @@ import org.esfe.dtos.rol.RolGuardarDto;
 import org.esfe.dtos.rol.RolModificarDto;
 import org.esfe.dtos.rol.RolSalidaDto;
 import org.esfe.servicios.interfaces.IRolService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,20 +25,19 @@ import java.util.Optional;
 @Validated
 public class RolController {
 
-    private final IRolService rolService;
+    @Autowired
+    private IRolService rolService;
 
-    public RolController(IRolService rolService) {
-        this.rolService = rolService;
-    }
-
-    // Listar todos (sin paginar)
+    // ✅ Listar todos: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping
     public ResponseEntity<List<RolSalidaDto>> listarTodos() {
         List<RolSalidaDto> lista = rolService.obtenerTodos();
         return ResponseEntity.ok(lista);
     }
 
-    // Obtener por id
+    // ✅ Obtener por ID: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{id}")
     public ResponseEntity<RolSalidaDto> obtenerPorId(@PathVariable Long id) {
         Optional<RolSalidaDto> opt = rolService.obtenerPorId(id);
@@ -44,7 +45,8 @@ public class RolController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // Crear
+    // ✅ Crear: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody RolGuardarDto dto) {
         try {
@@ -59,11 +61,11 @@ public class RolController {
         }
     }
 
-    // Editar (PUT)
+    // ✅ Editar: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Long id, @Valid @RequestBody RolModificarDto dto) {
         try {
-            // Asegurar coherencia del id
             if (dto.getId() == null) {
                 dto.setId(id);
             } else if (!dto.getId().equals(id)) {
@@ -79,7 +81,8 @@ public class RolController {
         }
     }
 
-    // Eliminar
+    // ✅ Eliminar: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
@@ -90,14 +93,14 @@ public class RolController {
         }
     }
 
-    // Paginado y filtrado
+    // ✅ Paginado: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/paginado")
     public ResponseEntity<Page<RolSalidaDto>> paginado(
             @RequestParam(name = "busqueda", required = false) String busqueda,
             Pageable pageable) {
-        Page<RolSalidaDto> page = rolService.obtenerRolesPaginadosYFiltrados(Optional.ofNullable(busqueda), pageable);
+        Page<RolSalidaDto> page = rolService.obtenerRolesPaginadosYFiltrados(
+                Optional.ofNullable(busqueda), pageable);
         return ResponseEntity.ok(page);
     }
-
 }
-
