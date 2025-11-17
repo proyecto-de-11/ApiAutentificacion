@@ -7,9 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Utilidades de seguridad generales
- */
 @Component
 public class SecurityUtils {
 
@@ -42,14 +39,21 @@ public class SecurityUtils {
      * Verifica si el usuario actual es ADMIN
      */
     public static boolean isCurrentUserAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return hasRole("ADMINISTRADOR");
+    }
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
+    /**
+     * ✅ NUEVO: Verifica si el usuario actual es PROPIETARIO
+     */
+    public static boolean isCurrentUserPropietario() {
+        return hasRole("PROPIETARIO");
+    }
 
-        return authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+    /**
+     * ✅ NUEVO: Verifica si el usuario tiene rol privilegiado (ADMIN o PROPIETARIO)
+     */
+    public static boolean isPrivilegedUser() {
+        return hasAnyRole("ADMINISTRADOR", "PROPIETARIO");
     }
 
     /**
@@ -69,13 +73,69 @@ public class SecurityUtils {
     }
 
     /**
-     * Verifica si el usuario actual es el propietario del recurso
+     * ✅ NUEVO: Verifica si tiene alguno de los roles especificados
      */
-    public static boolean isOwnerOrAdmin(Integer resourceOwnerId) {
-        if (isCurrentUserAdmin()) {
+    public static boolean hasAnyRole(String... roles) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        for (String role : roles) {
+            String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+            boolean hasRole = authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals(roleWithPrefix));
+            if (hasRole) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * ✅ ACTUALIZADO: Verifica si es propietario o admin
+     */
+    public static boolean isOwnerOrPrivileged(Integer resourceOwnerId) {
+        // Si es ADMIN o PROPIETARIO, permitir acceso
+        if (isPrivilegedUser()) {
             return true;
         }
 
+        // Si es USUARIO normal, verificar propiedad
+        Optional<Integer> currentUserId = getCurrentUserId();
+        return currentUserId.isPresent() && currentUserId.get().equals(resourceOwnerId);
+    }
+
+    /**
+     * ✅ NUEVO: Verifica si puede modificar un recurso
+     * ADMIN puede modificar todo
+     * PROPIETARIO y USUARIO solo sus propios recursos
+     */
+    public static boolean canModifyResource(Integer resourceOwnerId) {
+        if (isCurrentUserAdmin()) {
+            return true; // ADMIN puede modificar TODO
+        }
+
+        // PROPIETARIO y USUARIO solo pueden modificar lo suyo
+        Optional<Integer> currentUserId = getCurrentUserId();
+        return currentUserId.isPresent() && currentUserId.get().equals(resourceOwnerId);
+    }
+
+    /**
+     * ✅ NUEVO: Verifica si puede eliminar un recurso
+     * Solo ADMIN y PROPIETARIO pueden eliminar
+     */
+    public static boolean canDeleteResource(Integer resourceOwnerId) {
+        if (!isPrivilegedUser()) {
+            return false; // USUARIO normal no puede eliminar
+        }
+
+        if (isCurrentUserAdmin()) {
+            return true; // ADMIN puede eliminar TODO
+        }
+
+        // PROPIETARIO solo puede eliminar lo suyo
         Optional<Integer> currentUserId = getCurrentUserId();
         return currentUserId.isPresent() && currentUserId.get().equals(resourceOwnerId);
     }
