@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//Imports de Seguridad
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -40,7 +39,8 @@ public class UsuarioAceptacionTerminoController {
         List<UsuarioAceptacionTerminoSalidaDto> lista = service.obtenerTodos();
         return ResponseEntity.ok(lista);
     }
-    // ✅ Obtener por ID: ADMIN o el mismo usuario
+
+    // ✅ Obtener por ID: ADMIN o el mismo usuario (PROPIETARIO incluido)
     @PreAuthorize("hasRole('ADMINISTRADOR') or @aceptacionSecurity.isOwner(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioAceptacionTerminoSalidaDto> obtenerPorId(@PathVariable Integer id) {
@@ -49,8 +49,8 @@ public class UsuarioAceptacionTerminoController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // ✅ Crear: Usuario solo puede crear sus propias aceptaciones
-    @PreAuthorize("isAuthenticated()")
+    // ✅ Crear: PROPIETARIO y USUARIO pueden crear sus propias aceptaciones
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROPIETARIO', 'USUARIO')")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody UsuarioAceptacionTerminoGuardarDto dto,
                                    HttpServletRequest request,
@@ -58,7 +58,12 @@ public class UsuarioAceptacionTerminoController {
         try {
             // Verificar que el usuario solo pueda crear sus propias aceptaciones
             org.esfe.modelos.Usuario usuario = (org.esfe.modelos.Usuario) authentication.getPrincipal();
-            if (!dto.getIdUsuario().equals(usuario.getId())) {
+
+            // ADMIN puede crear para cualquiera, otros solo para sí mismos
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+
+            if (!isAdmin && !dto.getIdUsuario().equals(usuario.getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("No puede crear aceptaciones para otro usuario");
             }
@@ -80,7 +85,7 @@ public class UsuarioAceptacionTerminoController {
         }
     }
 
-    // ✅ Editar: ADMIN o el mismo usuario
+    // ✅ Editar: ADMIN o el mismo usuario (PROPIETARIO incluido)
     @PreAuthorize("hasRole('ADMINISTRADOR') or @aceptacionSecurity.isOwner(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id,
@@ -104,7 +109,7 @@ public class UsuarioAceptacionTerminoController {
         }
     }
 
-    // ✅ Eliminar: Solo ADMIN
+    // ✅ Eliminar: Solo ADMIN (PROPIETARIO NO puede eliminar)
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
