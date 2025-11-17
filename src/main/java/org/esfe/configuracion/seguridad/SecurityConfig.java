@@ -18,6 +18,7 @@ import java.util.Arrays;
 
 /**
  * Configuración principal de seguridad de Spring Security
+ * PROPIETARIO tiene los mismos permisos que USUARIO
  */
 @Configuration
 @EnableWebSecurity
@@ -61,35 +62,43 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // ========== RUTAS PROTEGIDAS POR ROL ==========
+
                         // Usuarios - solo ADMIN puede hacer todo
                         .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
 
                         // Roles - solo ADMIN
                         .requestMatchers("/api/roles/**").hasRole("ADMINISTRADOR")
 
-                        // Documentos Legales - ADMIN puede crear/editar, otros solo ver
-                        .requestMatchers("/api/documentoslegales/lista", "/api/documentoslegales/{id}").authenticated()
+                        // Documentos Legales - ADMIN/PROPIETARIO/USUARIO pueden ver, solo ADMIN modifica
+                        .requestMatchers("/api/documentoslegales/lista", "/api/documentoslegales/{id}")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
                         .requestMatchers("/api/documentoslegales/**").hasRole("ADMINISTRADOR")
 
-                        // Membresías - ADMIN puede gestionar, usuarios pueden ver
-                        .requestMatchers("/api/membresias/lista", "/api/membresias/{id}").authenticated()
+                        // Membresías - ADMIN/PROPIETARIO/USUARIO pueden ver, solo ADMIN modifica
+                        .requestMatchers("/api/membresias/lista", "/api/membresias/{id}")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
                         .requestMatchers("/api/membresias/**").hasRole("ADMINISTRADOR")
 
-                        // Tipos de Deporte - todos pueden ver, solo ADMIN modifica
-                        .requestMatchers("/api/tiposdeporte/lista", "/api/tiposdeporte/{id}").authenticated()
+                        // Tipos de Deporte - ADMIN/PROPIETARIO/USUARIO pueden ver, solo ADMIN modifica
+                        .requestMatchers("/api/tiposdeporte/lista", "/api/tiposdeporte/{id}")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
                         .requestMatchers("/api/tiposdeporte/**").hasRole("ADMINISTRADOR")
 
-                        // Perfiles - cada usuario puede ver/editar su propio perfil
-                        .requestMatchers("/api/perfiles/**").authenticated()
+                        // Perfiles - PROPIETARIO y USUARIO pueden gestionar sus propios perfiles
+                        .requestMatchers("/api/perfiles/**")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
 
-                        // Preferencias - cada usuario gestiona las suyas
-                        .requestMatchers("/api/preferencias/**").authenticated()
+                        // Preferencias - PROPIETARIO y USUARIO gestionan las suyas
+                        .requestMatchers("/api/preferencias/**")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
 
-                        // Aceptaciones de términos
-                        .requestMatchers("/api/aceptaciones/**").authenticated()
+                        // Aceptaciones de términos - PROPIETARIO y USUARIO pueden gestionar las suyas
+                        .requestMatchers("/api/aceptaciones/**")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
 
-                        // Usuario-Membresías
-                        .requestMatchers("/api/usuario-membresias/**").authenticated()
+                        // Usuario-Membresías - PROPIETARIO y USUARIO pueden gestionar las suyas
+                        .requestMatchers("/api/usuario-membresias/**")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
 
                         // ========== TODAS LAS DEMÁS RUTAS REQUIEREN AUTENTICACIÓN ==========
                         .anyRequest().authenticated()
