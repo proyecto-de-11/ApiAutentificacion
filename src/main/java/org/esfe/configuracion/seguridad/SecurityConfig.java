@@ -62,22 +62,22 @@ public class SecurityConfig {
 
                         // ========== RUTAS PROTEGIDAS POR ROL ==========
                         // Usuarios - solo ADMIN puede hacer todo
-                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
 
                         // Roles - solo ADMIN
-                        .requestMatchers("/api/roles/**").hasRole("ADMIN")
+                        .requestMatchers("/api/roles/**").hasRole("ADMINISTRADOR")
 
                         // Documentos Legales - ADMIN puede crear/editar, otros solo ver
                         .requestMatchers("/api/documentoslegales/lista", "/api/documentoslegales/{id}").authenticated()
-                        .requestMatchers("/api/documentoslegales/**").hasRole("ADMIN")
+                        .requestMatchers("/api/documentoslegales/**").hasRole("ADMINISTRADOR")
 
                         // Membresías - ADMIN puede gestionar, usuarios pueden ver
                         .requestMatchers("/api/membresias/lista", "/api/membresias/{id}").authenticated()
-                        .requestMatchers("/api/membresias/**").hasRole("ADMIN")
+                        .requestMatchers("/api/membresias/**").hasRole("ADMINISTRADOR")
 
                         // Tipos de Deporte - todos pueden ver, solo ADMIN modifica
                         .requestMatchers("/api/tiposdeporte/lista", "/api/tiposdeporte/{id}").authenticated()
-                        .requestMatchers("/api/tiposdeporte/**").hasRole("ADMIN")
+                        .requestMatchers("/api/tiposdeporte/**").hasRole("ADMINISTRADOR")
 
                         // Perfiles - cada usuario puede ver/editar su propio perfil
                         .requestMatchers("/api/perfiles/**").authenticated()

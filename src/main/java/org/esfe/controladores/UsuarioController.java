@@ -4,10 +4,12 @@ import org.esfe.dtos.usuario.UsuarioGuardarDto;
 import org.esfe.dtos.usuario.UsuarioModificarDto;
 import org.esfe.dtos.usuario.UsuarioSalidaDto;
 import org.esfe.servicios.interfaces.IUsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,18 +25,20 @@ import java.util.Optional;
 @Validated
 public class UsuarioController {
 
-    private final IUsuarioService usuarioService;
+    @Autowired
+    private IUsuarioService usuarioService;
 
-    public UsuarioController(IUsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
-    }
-
+    // ✅ Solo ADMIN puede listar todos los usuarios
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping
     public ResponseEntity<List<UsuarioSalidaDto>> listarTodos() {
         List<UsuarioSalidaDto> lista = usuarioService.obtenerTodos();
         return ResponseEntity.ok(lista);
     }
 
+    // ✅ Solo ADMIN puede ver cualquier usuario
+    // Un usuario normal solo debería poder ver su propio perfil
+    @PreAuthorize("hasRole('ADMINISTRADOR') or #id == authentication.principal.id")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioSalidaDto> obtenerPorId(@PathVariable Integer id) {
         Optional<UsuarioSalidaDto> opt = usuarioService.obtenerPorId(id);
@@ -42,6 +46,8 @@ public class UsuarioController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    // ✅ Crear usuario: público (se hace en registro) o solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody UsuarioGuardarDto dto) {
         try {
@@ -56,6 +62,8 @@ public class UsuarioController {
         }
     }
 
+    // ✅ Editar: Solo ADMIN o el mismo usuario
+    @PreAuthorize("hasRole('ADMINISTRADOR') or #id == authentication.principal.id")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id, @Valid @RequestBody UsuarioModificarDto dto) {
         try {
@@ -74,6 +82,8 @@ public class UsuarioController {
         }
     }
 
+    // ✅ Eliminar: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
@@ -84,12 +94,14 @@ public class UsuarioController {
         }
     }
 
+    // ✅ Paginado: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/paginado")
-    public ResponseEntity<Page<UsuarioSalidaDto>> paginado(@RequestParam(name = "busqueda", required = false) String busqueda,
-                                                             Pageable pageable) {
-        Page<UsuarioSalidaDto> page = usuarioService.obtenerUsuariosPaginadosYFiltrados(Optional.ofNullable(busqueda), pageable);
+    public ResponseEntity<Page<UsuarioSalidaDto>> paginado(
+            @RequestParam(name = "busqueda", required = false) String busqueda,
+            Pageable pageable) {
+        Page<UsuarioSalidaDto> page = usuarioService.obtenerUsuariosPaginadosYFiltrados(
+                Optional.ofNullable(busqueda), pageable);
         return ResponseEntity.ok(page);
     }
-
 }
-
