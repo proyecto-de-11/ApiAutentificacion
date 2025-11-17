@@ -3,10 +3,16 @@ package org.esfe.modelos;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
 @Table(name = "usuarios")
-public class Usuario {
+public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -21,7 +27,7 @@ public class Usuario {
     @NotBlank(message = "La contraseña es requerida")
     private String contrasena;
 
-    @ManyToOne(fetch = FetchType.EAGER) // El rol se carga inmediatamente con el usuario
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idRol", nullable = false)
     private Rol rol;
 
@@ -34,7 +40,49 @@ public class Usuario {
     @Column(name = "fecha_actualizacion", nullable = true, columnDefinition = "DATETIME")
     private String fechaActualizacion;
 
-    // Getters y Setters explícitos
+    // ========== IMPLEMENTACIÓN DE UserDetails ==========
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (rol != null) {
+            return Collections.singletonList(
+                    new SimpleGrantedAuthority("ROLE_" + rol.getNombre().toUpperCase())
+            );
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String getPassword() {
+        return contrasena;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return estaActivo != null && estaActivo;
+    }
+    // ========== FIN IMPLEMENTACIÓN UserDetails ==========
+
+    // Getters y Setters normales
     public Integer getId() {
         return id;
     }
