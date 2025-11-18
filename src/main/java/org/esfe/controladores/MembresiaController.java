@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -23,6 +24,8 @@ public class MembresiaController {
     @Autowired
     private IMembresiaService membresiaService;
 
+    // ✅ Ver lista paginada: Todos los usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<Page<MembresiaSalidaDto>> mostrarTodosPaginadosYFiltrados(
             @RequestParam(required = false) Optional<String> busqueda,
@@ -32,6 +35,8 @@ public class MembresiaController {
         return ResponseEntity.ok(page);
     }
 
+    // ✅ Ver lista completa: Todos los usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/lista")
     public ResponseEntity<List<MembresiaSalidaDto>> mostrarTodos() {
         List<MembresiaSalidaDto> lista = membresiaService.obtenerTodos();
@@ -41,11 +46,17 @@ public class MembresiaController {
         return ResponseEntity.notFound().build();
     }
 
+    // ✅ Ver por ID: Todos los usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<MembresiaSalidaDto> buscarPorId(@PathVariable Integer id) {
-        return membresiaService.obtenerPorId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return membresiaService.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // ✅ Crear: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody MembresiaGuardarDto dto) {
         try {
@@ -54,10 +65,13 @@ public class MembresiaController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear la membresía: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear la membresía: " + e.getMessage());
         }
     }
 
+    // ✅ Editar: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id, @Valid @RequestBody MembresiaModificarDto dto) {
         try {
@@ -69,10 +83,13 @@ public class MembresiaController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la membresía: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar la membresía: " + e.getMessage());
         }
     }
 
+    // ✅ Eliminar: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         try {
@@ -81,7 +98,8 @@ public class MembresiaController {
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar la membresía: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar la membresía: " + e.getMessage());
         }
     }
 }

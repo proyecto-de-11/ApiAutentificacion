@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -23,21 +24,21 @@ public class TipoDeporteController {
     @Autowired
     private ITipoDeporteService tipoDeporteService;
 
+    // ✅ Ver lista paginada: Todos los usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<Page<TiposDeporteSalidaDto>> mostrarTodosPaginadosYFiltrados(
             @RequestParam(required = false) Optional<String> busqueda,
             Pageable pageable) {
 
-        Page<TiposDeporteSalidaDto> tiposDeportePage = 
-            tipoDeporteService.obtenerTiposDeportePaginadosYFiltrados(busqueda, pageable);
+        Page<TiposDeporteSalidaDto> tiposDeportePage =
+                tipoDeporteService.obtenerTiposDeportePaginadosYFiltrados(busqueda, pageable);
 
-        if (tiposDeportePage.hasContent()) {
-            return ResponseEntity.ok(tiposDeportePage);
-        }
-        
         return ResponseEntity.ok(tiposDeportePage);
     }
 
+    // ✅ Ver lista completa: Todos los usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/lista")
     public ResponseEntity<List<TiposDeporteSalidaDto>> mostrarTodos() {
         List<TiposDeporteSalidaDto> tiposDeporte = tipoDeporteService.obtenerTodos();
@@ -47,6 +48,8 @@ public class TipoDeporteController {
         return ResponseEntity.notFound().build();
     }
 
+    // ✅ Ver por ID: Todos los usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<TiposDeporteSalidaDto> buscarPorId(@PathVariable Long id) {
         return tipoDeporteService.obtenerPorId(id)
@@ -54,39 +57,41 @@ public class TipoDeporteController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // ✅ Crear: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody TiposDeporteGuardarDto tipoDeporteGuardarDto) {
         try {
             TiposDeporteSalidaDto nuevoTipo = tipoDeporteService.crear(tipoDeporteGuardarDto);
-            // Retorna 201 Created
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoTipo);
         } catch (IllegalArgumentException e) {
-            // Captura errores de validación de negocio (ej. nombre duplicado)
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el Tipo de Deporte: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear el Tipo de Deporte: " + e.getMessage());
         }
     }
 
+    // ✅ Editar: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Long id, @Valid @RequestBody TiposDeporteModificarDto tipoDeporteModificarDto) {
         try {
-            // Asegurar que el ID del path coincida con el ID del body
-            tipoDeporteModificarDto.setId(id); 
+            tipoDeporteModificarDto.setId(id);
             TiposDeporteSalidaDto actualizado = tipoDeporteService.editar(tipoDeporteModificarDto);
             return ResponseEntity.ok(actualizado);
         } catch (NoSuchElementException e) {
-            // No encontrado (ID incorrecto)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
-             // Conflicto (Nombre duplicado)
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            // Otros errores
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar: " + e.getMessage());
         }
     }
 
+    // ✅ Eliminar: Solo ADMIN
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         try {
@@ -95,7 +100,8 @@ public class TipoDeporteController {
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar: " + e.getMessage());
         }
     }
 }

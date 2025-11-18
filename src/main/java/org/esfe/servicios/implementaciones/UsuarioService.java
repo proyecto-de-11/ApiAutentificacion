@@ -8,11 +8,14 @@ import org.esfe.modelos.Usuario;
 import org.esfe.repositorios.IRolRepository;
 import org.esfe.repositorios.IUsuarioRepository;
 import org.esfe.servicios.interfaces.IUsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -22,13 +25,14 @@ import java.util.stream.Collectors;
 @Transactional
 public class UsuarioService implements IUsuarioService {
 
-    private final IUsuarioRepository usuarioRepository;
-    private final IRolRepository rolRepository;
+    @Autowired
+    private IUsuarioRepository usuarioRepository;
 
-    public UsuarioService(IUsuarioRepository usuarioRepository, IRolRepository rolRepository) {
-        this.usuarioRepository = usuarioRepository;
-        this.rolRepository = rolRepository;
-    }
+    @Autowired
+    private IRolRepository rolRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder; // ✅ NUEVO: Para encriptar passwords
 
     private UsuarioSalidaDto mapToDto(Usuario usuario) {
         if (usuario == null) return null;
@@ -36,7 +40,7 @@ public class UsuarioService implements IUsuarioService {
         dto.setId(usuario.getId());
         dto.setEmail(usuario.getEmail());
 
-        // CAMBIO: Mapear rol completo
+        // Mapear rol completo
         if (usuario.getRol() != null) {
             UsuarioSalidaDto.RolSimpleDto rolDto = new UsuarioSalidaDto.RolSimpleDto(
                     usuario.getRol().getId(),
@@ -68,7 +72,7 @@ public class UsuarioService implements IUsuarioService {
     @Override
     public UsuarioSalidaDto crear(UsuarioGuardarDto usuarioGuardarDto) {
         // Verificar que no exista por email
-        usuarioRepository.findByEmailIgnoreCase(usuarioGuardarDto.getEmail()).ifPresent(u -> {
+        usuarioRepository.findByEmail(usuarioGuardarDto.getEmail()).ifPresent(u -> {
             throw new IllegalArgumentException("Ya existe un usuario con ese correo.");
         });
 
@@ -78,11 +82,13 @@ public class UsuarioService implements IUsuarioService {
 
         Usuario usuario = new Usuario();
         usuario.setEmail(usuarioGuardarDto.getEmail());
-        usuario.setContrasena(usuarioGuardarDto.getContrasena());
+
+        // ✅ IMPORTANTE: Encriptar la contraseña antes de guardar
+        usuario.setContrasena(passwordEncoder.encode(usuarioGuardarDto.getContrasena()));
+
         usuario.setRol(rol);
         usuario.setEstaActivo(usuarioGuardarDto.getEstaActivo());
-        // fechas: se pueden asignar en el servicio (formato string usado en la entidad)
-        usuario.setFechaCreacion(java.time.LocalDateTime.now().toString());
+        usuario.setFechaCreacion(LocalDateTime.now().toString());
 
         Usuario guardado = usuarioRepository.save(usuario);
         return mapToDto(guardado);
@@ -94,15 +100,20 @@ public class UsuarioService implements IUsuarioService {
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado con id: " + usuarioModificarDto.getId()));
 
         // Si se cambia email, verificar duplicado
-        if (usuarioModificarDto.getEmail() != null && !usuarioModificarDto.getEmail().equalsIgnoreCase(existente.getEmail())) {
-            usuarioRepository.findByEmailIgnoreCase(usuarioModificarDto.getEmail())
+        if (usuarioModificarDto.getEmail() != null &&
+                !usuarioModificarDto.getEmail().equalsIgnoreCase(existente.getEmail())) {
+            usuarioRepository.findByEmail(usuarioModificarDto.getEmail())
                     .filter(u -> !u.getId().equals(usuarioModificarDto.getId()))
-                    .ifPresent(u -> { throw new IllegalArgumentException("Otro usuario con ese correo ya existe."); });
+                    .ifPresent(u -> {
+                        throw new IllegalArgumentException("Otro usuario con ese correo ya existe.");
+                    });
             existente.setEmail(usuarioModificarDto.getEmail());
         }
 
-        if (usuarioModificarDto.getContrasena() != null && !usuarioModificarDto.getContrasena().isBlank()) {
-            existente.setContrasena(usuarioModificarDto.getContrasena());
+        // ✅ IMPORTANTE: Solo actualizar contraseña si se proporciona una nueva
+        if (usuarioModificarDto.getContrasena() != null &&
+                !usuarioModificarDto.getContrasena().isBlank()) {
+            existente.setContrasena(passwordEncoder.encode(usuarioModificarDto.getContrasena()));
         }
 
         // Actualizar rol
@@ -111,7 +122,7 @@ public class UsuarioService implements IUsuarioService {
         existente.setRol(rol);
 
         existente.setEstaActivo(usuarioModificarDto.getEstaActivo());
-        existente.setFechaActualizacion(java.time.LocalDateTime.now().toString());
+        existente.setFechaActualizacion(LocalDateTime.now().toString());
 
         Usuario actualizado = usuarioRepository.save(existente);
         return mapToDto(actualizado);
@@ -133,10 +144,9 @@ public class UsuarioService implements IUsuarioService {
             page = usuarioRepository.findAll(pageable);
         } else {
             String q = busqueda.get().trim();
-            // intentar parsear q a boolean para búsquedas por estaActivo
-            Boolean activo = null;
+            // Intentar parsear q a boolean para búsquedas por estaActivo
             if (q.equalsIgnoreCase("true") || q.equalsIgnoreCase("false")) {
-                activo = Boolean.valueOf(q);
+                Boolean activo = Boolean.valueOf(q);
                 page = usuarioRepository.findByEstaActivo(activo, pageable);
             } else {
                 page = usuarioRepository.findByEmailContainingIgnoreCase(q, pageable);
