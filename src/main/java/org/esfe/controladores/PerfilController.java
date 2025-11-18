@@ -24,8 +24,8 @@ public class PerfilController {
     @Autowired
     private IPerfilService perfilService;
 
-    // ✅ Listar todos: Solo ADMIN
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    // ✅ Listar todos: Solo ADMIN y si esta autenticado
+    @PreAuthorize("hasRole('ADMINISTRADOR') and isAuthenticated()")
     @GetMapping
     public List<PerfilSalidaDto> listarTodos() {
         return perfilService.listarTodos();
