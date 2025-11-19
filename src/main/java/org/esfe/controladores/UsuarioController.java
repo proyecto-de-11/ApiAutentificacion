@@ -40,10 +40,11 @@ public class UsuarioController {
     // Un usuario normal solo debería poder ver su propio perfil
     @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioSecurity.isOwner(#id, authentication)")
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioSalidaDto> obtenerPorId(@PathVariable Integer id) {
-        Optional<UsuarioSalidaDto> opt = usuarioService.obtenerPorId(id);
+    public Optional<UsuarioSalidaDto> obtenerPorId(@PathVariable Integer id) {
+        /*Optional<UsuarioSalidaDto> opt = usuarioService.obtenerPorId(id);
         return opt.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());*/
+        return usuarioService.obtenerPorId(id);
     }
 
     // ✅ Crear usuario: público (se hace en registro) o solo ADMIN
