@@ -30,6 +30,7 @@
         <java.version>21</java.version>
     </properties>
     <dependencies>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -102,8 +103,34 @@
             <scope>runtime</scope>
         </dependency>
         <!-- ========== FIN DEPENDENCIAS DE SEGURIDAD ========== -->
+        <!-- ========== DEPENDENCIAS DE SPRING CLOUD ========== -->
+        <!-- ✅ Eureka Client - SIN especificar versión (la gestiona el BOM) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <!-- ✅ Spring Cloud Config Client - SIN especificar versión -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        <!-- ========== FIN DEPENDENCIAS DE SPRING CLOUD ========== -->
     </dependencies>
 
+    <!-- ✅ IMPORTANTE: Gestión de dependencias de Spring Cloud -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-dependencies -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2024.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <plugins>
             <plugin>
