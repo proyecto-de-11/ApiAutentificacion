@@ -3,6 +3,7 @@ package org.esfe.configuracion.seguridad;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -63,9 +64,12 @@ public class SecurityConfig {
 
                         // ========== RUTAS PROTEGIDAS POR ROL ==========
 
-                        // Usuarios - solo ADMIN puede hacer todo
+                        // Usuarios - GET y PUT por ID permitido para todos los roles, resto solo ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/{id}")
+                        .hasAnyRole("ADMINISTRADOR", "PROPIETARIO", "USUARIO")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
-
                         // Roles - solo ADMIN
                         .requestMatchers("/api/roles/**").hasRole("ADMINISTRADOR")
 
