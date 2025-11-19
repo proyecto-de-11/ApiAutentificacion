@@ -3,6 +3,7 @@ package org.esfe;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * Aplicación principal de Autenticación
@@ -11,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling // Habilita @Scheduled en TokenBlacklistService
+@EnableDiscoveryClient  // ✅ Habilitado para Eureka en la nube
 public class AutenticacionApplication {
 
     public static void main(String[] args) {
