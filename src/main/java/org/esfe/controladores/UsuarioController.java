@@ -36,18 +36,17 @@ public class UsuarioController {
         return ResponseEntity.ok(lista);
     }
 
-    // ✅ Solo ADMIN puede ver cualquier usuario
-    // Un usuario normal solo debería poder ver su propio perfil
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioSecurity.isOwner(#id, authentication)")
+    // ✅ ADMIN puede ver cualquier usuario, otros solo pueden ver su propio perfil
+    // Usa el helper que lanza AccessDeniedException
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioSecurity.canAccess(#id, authentication)")
     @GetMapping("/{id}")
-    public Optional<UsuarioSalidaDto> obtenerPorId(@PathVariable Integer id) {
-        /*Optional<UsuarioSalidaDto> opt = usuarioService.obtenerPorId(id);
+    public ResponseEntity<UsuarioSalidaDto> obtenerPorId(@PathVariable Integer id) {
+        Optional<UsuarioSalidaDto> opt = usuarioService.obtenerPorId(id);
         return opt.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());*/
-        return usuarioService.obtenerPorId(id);
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // ✅ Crear usuario: público (se hace en registro) o solo ADMIN
+    // ✅ Crear usuario: solo ADMIN
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody UsuarioGuardarDto dto) {
@@ -63,8 +62,9 @@ public class UsuarioController {
         }
     }
 
-    // ✅ Editar: Solo ADMIN o el mismo usuario
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioSecurity.isOwner(#id, authentication)")
+    // ✅ Editar: ADMIN puede editar a cualquiera, otros solo pueden editarse a sí mismos
+    // Usa el helper que lanza AccessDeniedException
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioSecurity.canModify(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id, @Valid @RequestBody UsuarioModificarDto dto) {
         try {
