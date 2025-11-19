@@ -34,49 +34,66 @@ public class PreferenciaUsuarioController {
     // ✅ Crear: PROPIETARIO y USUARIO pueden crear sus propias preferencias
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROPIETARIO', 'USUARIO')")
     @PostMapping
-    public ResponseEntity<PreferenciaUsuarioSalidaDTO> guardar(@Valid @RequestBody PreferenciaUsuarioGuardarDTO dto,
-                                                               Authentication authentication) {
-        // Verificar que el usuario solo pueda crear sus propias preferencias
-        org.esfe.modelos.Usuario usuario = (org.esfe.modelos.Usuario) authentication.getPrincipal();
+    public ResponseEntity<?> guardar(@Valid @RequestBody PreferenciaUsuarioGuardarDTO dto,
+                                     Authentication authentication) {
+        try {
+            // Verificar que el usuario solo pueda crear sus propias preferencias
+            org.esfe.modelos.Usuario usuario = (org.esfe.modelos.Usuario) authentication.getPrincipal();
 
-        // ADMIN puede crear para cualquiera, otros solo para sí mismos
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+            // ADMIN puede crear para cualquiera, otros solo para sí mismos
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
 
-        if (!isAdmin && !dto.getUsuarioId().equals(usuario.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            if (!isAdmin && !dto.getUsuarioId().equals(usuario.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No puedes crear preferencias para otro usuario");
+            }
+
+            PreferenciaUsuarioSalidaDTO salida = service.guardar(dto);
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(salida.getId()).toUri();
+            return ResponseEntity.created(location).body(salida);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
         }
-
-        PreferenciaUsuarioSalidaDTO salida = service.guardar(dto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(salida.getId()).toUri();
-        return ResponseEntity.created(location).body(salida);
     }
 
     // ✅ Modificar: ADMIN o el mismo usuario (PROPIETARIO incluido)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @preferenciasSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @preferenciasSecurity.canAccess(#id, authentication)")
     @PutMapping("/{id}")
-    public ResponseEntity<PreferenciaUsuarioSalidaDTO> modificar(@PathVariable Integer id,
-                                                                 @Valid @RequestBody PreferenciaUsuarioModificarDTO dto) {
-        dto.setId(id);
-        PreferenciaUsuarioSalidaDTO salida = service.modificar(dto);
-        return ResponseEntity.ok(salida);
+    public ResponseEntity<?> modificar(@PathVariable Integer id,
+                                       @Valid @RequestBody PreferenciaUsuarioModificarDTO dto) {
+        try {
+            dto.setId(id);
+            PreferenciaUsuarioSalidaDTO salida = service.modificar(dto);
+            return ResponseEntity.ok(salida);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 
     // ✅ Obtener por ID: ADMIN o el mismo usuario (PROPIETARIO incluido)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @preferenciasSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @preferenciasSecurity.canAccess(#id, authentication)")
     @GetMapping("/{id}")
-    public ResponseEntity<PreferenciaUsuarioSalidaDTO> obtenerPorId(@PathVariable Integer id) {
-        PreferenciaUsuarioSalidaDTO salida = service.obtenerPorId(id);
-        return ResponseEntity.ok(salida);
+    public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
+        try {
+            PreferenciaUsuarioSalidaDTO salida = service.obtenerPorId(id);
+            return ResponseEntity.ok(salida);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 
     // ✅ Obtener por usuario: ADMIN o el mismo usuario
     @PreAuthorize("hasRole('ADMINISTRADOR') or #usuarioId == authentication.principal.id")
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<PreferenciaUsuarioSalidaDTO> obtenerPorUsuario(@PathVariable Integer usuarioId) {
-        PreferenciaUsuarioSalidaDTO salida = service.obtenerPorUsuarioId(usuarioId);
-        return ResponseEntity.ok(salida);
+    public ResponseEntity<?> obtenerPorUsuario(@PathVariable Integer usuarioId) {
+        try {
+            PreferenciaUsuarioSalidaDTO salida = service.obtenerPorUsuarioId(usuarioId);
+            return ResponseEntity.ok(salida);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 
     // ✅ Listar todos: Solo ADMIN
