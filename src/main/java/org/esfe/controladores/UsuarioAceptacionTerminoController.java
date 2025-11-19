@@ -41,7 +41,7 @@ public class UsuarioAceptacionTerminoController {
     }
 
     // ✅ Obtener por ID: ADMIN o el mismo usuario (PROPIETARIO incluido)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @aceptacionSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @aceptacionSecurity.canAccess(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioAceptacionTerminoSalidaDto> obtenerPorId(@PathVariable Integer id) {
         Optional<UsuarioAceptacionTerminoSalidaDto> opt = service.obtenerPorId(id);
@@ -65,7 +65,7 @@ public class UsuarioAceptacionTerminoController {
 
             if (!isAdmin && !dto.getIdUsuario().equals(usuario.getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("No puede crear aceptaciones para otro usuario");
+                        .body("No puedes crear aceptaciones para otro usuario");
             }
 
             // Capturar IP automáticamente
@@ -86,7 +86,7 @@ public class UsuarioAceptacionTerminoController {
     }
 
     // ✅ Editar: ADMIN o el mismo usuario (PROPIETARIO incluido)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @aceptacionSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @aceptacionSecurity.canAccess(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id,
                                     @Valid @RequestBody UsuarioAceptacionTerminoModificarDto dto,

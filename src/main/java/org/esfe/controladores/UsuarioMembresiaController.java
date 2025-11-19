@@ -57,7 +57,7 @@ public class UsuarioMembresiaController {
     }
 
     // ✅ Ver por ID: ADMIN o el propietario de la membresía
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioMembresiaSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioMembresiaSecurity.canAccess(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioMembresiaSalidaDto> buscarPorId(@PathVariable Integer id) {
         return usuarioMembresiaService.obtenerPorId(id)
@@ -80,7 +80,7 @@ public class UsuarioMembresiaController {
 
             if (!isAdmin && !dto.getUsuarioId().equals(usuario.getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("No puede crear membresías para otro usuario");
+                        .body("No puedes crear membresías para otro usuario");
             }
 
             UsuarioMembresiaSalidaDto nuevo = usuarioMembresiaService.crear(dto);
@@ -94,7 +94,7 @@ public class UsuarioMembresiaController {
     }
 
     // ✅ Editar: ADMIN o el propietario de la membresía
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioMembresiaSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioMembresiaSecurity.canAccess(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id,
                                     @Valid @RequestBody UsuarioMembresiaModificarDto dto) {
@@ -127,4 +127,3 @@ public class UsuarioMembresiaController {
         }
     }
 }
-

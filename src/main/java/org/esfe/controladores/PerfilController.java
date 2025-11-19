@@ -25,11 +25,12 @@ public class PerfilController {
     @Autowired
     private IPerfilService perfilService;
 
-    // ✅ Listar todos: Solo ADMIN y si esta autenticado
+    // ✅ Listar todos: Solo ADMIN
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping
-    public List<PerfilSalidaDto> listarTodos() {
-        return perfilService.listarTodos();
+    public ResponseEntity<List<PerfilSalidaDto>> listarTodos() {
+        List<PerfilSalidaDto> lista = perfilService.listarTodos();
+        return ResponseEntity.ok(lista);
     }
 
     // ✅ NUEVO: Listar perfiles públicos (solo datos básicos) - Todos los usuarios autenticados
@@ -55,39 +56,52 @@ public class PerfilController {
         return ResponseEntity.ok(perfilPublico);
     }
 
-    // ✅ Ver por ID: ADMIN o el mismo usuario (incluyendo PROPIETARIO)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @perfilSecurity.isOwner(#id, authentication)")
+    // ✅ Ver por ID: ADMIN o el mismo usuario (usa helper que lanza AccessDeniedException)
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @perfilSecurity.canAccess(#id, authentication)")
     @GetMapping("/{id}")
-    public PerfilSalidaDto obtenerPorId(@PathVariable Integer id) {
-        return perfilService.obtenerPorId(id);
+    public ResponseEntity<PerfilSalidaDto> obtenerPorId(@PathVariable Integer id) {
+        PerfilSalidaDto perfil = perfilService.obtenerPorId(id);
+        return ResponseEntity.ok(perfil);
     }
 
-    // ✅ Crear: Usuario autenticado crea su propio perfil (PROPIETARIO incluido)
+    // ✅ Crear: Usuario autenticado crea su propio perfil
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROPIETARIO', 'USUARIO')")
     @PostMapping
-    public ResponseEntity<PerfilSalidaDto> crear(@Valid @RequestBody PerfilGuardarDto dto,
-                                                 Authentication authentication) {
-        // Verificar que el usuario solo pueda crear su propio perfil
-        org.esfe.modelos.Usuario usuario = (org.esfe.modelos.Usuario) authentication.getPrincipal();
+    public ResponseEntity<?> crear(@Valid @RequestBody PerfilGuardarDto dto,
+                                   Authentication authentication) {
+        try {
+            // Verificar que el usuario solo pueda crear su propio perfil
+            org.esfe.modelos.Usuario usuario = (org.esfe.modelos.Usuario) authentication.getPrincipal();
 
-        // ADMIN puede crear perfiles para cualquiera, otros solo para sí mismos
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+            // ADMIN puede crear perfiles para cualquiera, otros solo para sí mismos
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
 
-        if (!isAdmin && !dto.getUsuarioId().equals(usuario.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            if (!isAdmin && !dto.getUsuarioId().equals(usuario.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No tienes permiso para crear perfiles para otros usuarios");
+            }
+
+            PerfilSalidaDto created = perfilService.crear(dto);
+            return ResponseEntity.created(URI.create("/perfiles/" + created.getId())).body(created);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear el perfil: " + e.getMessage());
         }
-
-        PerfilSalidaDto created = perfilService.crear(dto);
-        return ResponseEntity.created(URI.create("/perfiles/" + created.getId())).body(created);
     }
 
-    // ✅ Actualizar: ADMIN o el mismo usuario (PROPIETARIO incluido)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @perfilSecurity.isOwner(#id, authentication)")
+    // ✅ Actualizar: ADMIN o el mismo usuario (usa helper que lanza AccessDeniedException)
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @perfilSecurity.canAccess(#id, authentication)")
     @PutMapping("/{id}")
-    public PerfilSalidaDto actualizar(@PathVariable Integer id,
-                                      @Valid @RequestBody PerfilModificarDto dto) {
-        return perfilService.actualizar(id, dto);
+    public ResponseEntity<?> actualizar(@PathVariable Integer id,
+                                        @Valid @RequestBody PerfilModificarDto dto) {
+        try {
+            PerfilSalidaDto actualizado = perfilService.actualizar(id, dto);
+            return ResponseEntity.ok(actualizado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el perfil: " + e.getMessage());
+        }
     }
 
     // ✅ Eliminar: Solo ADMIN (PROPIETARIO NO puede eliminar)
@@ -101,21 +115,26 @@ public class PerfilController {
     // ✅ Obtener por usuario: ADMIN o el mismo usuario
     @PreAuthorize("hasRole('ADMINISTRADOR') or #usuarioId == authentication.principal.id")
     @GetMapping("/usuario/{usuarioId}")
-    public PerfilSalidaDto obtenerPorUsuarioId(@PathVariable Integer usuarioId) {
-        return perfilService.obtenerPorUsuarioId(usuarioId);
+    public ResponseEntity<PerfilSalidaDto> obtenerPorUsuarioId(@PathVariable Integer usuarioId) {
+        PerfilSalidaDto perfil = perfilService.obtenerPorUsuarioId(usuarioId);
+        return ResponseEntity.ok(perfil);
     }
 
     // ✅ Búsquedas: Solo ADMIN
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/ciudad/{ciudad}")
-    public List<PerfilSalidaDto> buscarPorCiudad(@PathVariable String ciudad) {
-        return perfilService.buscarPorCiudad(ciudad);
+    public ResponseEntity<List<PerfilSalidaDto>> buscarPorCiudad(@PathVariable String ciudad) {
+        List<PerfilSalidaDto> perfiles = perfilService.buscarPorCiudad(ciudad);
+        return ResponseEntity.ok(perfiles);
     }
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/buscar")
-    public List<PerfilSalidaDto> buscarPorPaisYCiudad(@RequestParam String pais, @RequestParam String ciudad) {
-        return perfilService.buscarPorPaisYCiudad(pais, ciudad);
+    public ResponseEntity<List<PerfilSalidaDto>> buscarPorPaisYCiudad(
+            @RequestParam String pais,
+            @RequestParam String ciudad) {
+        List<PerfilSalidaDto> perfiles = perfilService.buscarPorPaisYCiudad(pais, ciudad);
+        return ResponseEntity.ok(perfiles);
     }
 
     // ===== MÉTODO AUXILIAR PARA MAPEO =====
