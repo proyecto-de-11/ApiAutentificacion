@@ -38,7 +38,7 @@ public class UsuarioController {
 
     // ✅ Solo ADMIN puede ver cualquier usuario
     // Un usuario normal solo debería poder ver su propio perfil
-    @PreAuthorize("hasRole('ADMINISTRADOR') or #id == authentication.principal.id")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioSecurity.isOwner(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioSalidaDto> obtenerPorId(@PathVariable Integer id) {
         Optional<UsuarioSalidaDto> opt = usuarioService.obtenerPorId(id);
@@ -63,7 +63,7 @@ public class UsuarioController {
     }
 
     // ✅ Editar: Solo ADMIN o el mismo usuario
-    @PreAuthorize("hasRole('ADMINISTRADOR') or #id == authentication.principal.id")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @usuarioSecurity.isOwner(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable Integer id, @Valid @RequestBody UsuarioModificarDto dto) {
         try {
