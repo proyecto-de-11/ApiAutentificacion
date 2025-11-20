@@ -5,12 +5,17 @@ FROM maven:3.9.6-eclipse-temurin-21 AS build
 # Establece el directorio de trabajo
 WORKDIR /app
 
+# ✅ Configura la codificación UTF-8 para Maven
+ENV MAVEN_OPTS="-Dfile.encoding=UTF-8"
+
 # Copia los archivos de Maven (pom.xml) y el código fuente (src)
 COPY pom.xml .
 COPY src ./src
 
-# Compila el proyecto. Esto genera el JAR en /app/target/
-RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests
+# Compila el proyecto con codificación UTF-8 explícita
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests \
+    -Dproject.build.sourceEncoding=UTF-8 \
+    -Dproject.reporting.outputEncoding=UTF-8
 
 # --- Segunda fase: Ejecución ---
 # Usamos 'eclipse-temurin' con el JRE 21 (Alpine) para una imagen ligera y estable.
@@ -26,5 +31,4 @@ COPY --from=build /app/target/*.jar /app/app.jar
 EXPOSE 8081
 
 # Comando para ejecutar la aplicación
-# NOTA: Usamos el puerto 8081.
 CMD ["java", "-jar", "/app/app.jar"]
