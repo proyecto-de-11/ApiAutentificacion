@@ -144,6 +144,14 @@ public class PerfilService implements IPerfilService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<PerfilSalidaDto> buscarPorNombreCompleto(String nombre) {
+        return perfilRepository.findByNombreCompletoContainingIgnoreCase(nombre)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     private PerfilSalidaDto convertToDto(Perfil perfil) {
         PerfilSalidaDto dto = new PerfilSalidaDto();
         dto.setId(perfil.getId());

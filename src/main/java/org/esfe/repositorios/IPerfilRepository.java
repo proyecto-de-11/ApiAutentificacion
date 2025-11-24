@@ -31,4 +31,6 @@ public interface IPerfilRepository extends JpaRepository<Perfil, Integer> {
     @Query("SELECT p FROM Perfil p WHERE p.pais = :pais AND p.ciudad = :ciudad")
     List<Perfil> buscarPorPaisYCiudad(@Param("pais") String pais, @Param("ciudad") String ciudad);
 
+    // ✅ NUEVO: Buscar perfiles por nombre completo (case-insensitive, coincidencia parcial)
+    List<Perfil> findByNombreCompletoContainingIgnoreCase(String nombreCompleto);
 }
