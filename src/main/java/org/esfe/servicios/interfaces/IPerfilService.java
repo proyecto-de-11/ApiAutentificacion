@@ -15,4 +15,5 @@ public interface IPerfilService {
     PerfilSalidaDto obtenerPorUsuarioId(Integer usuarioId);
     List<PerfilSalidaDto> buscarPorCiudad(String ciudad);
     List<PerfilSalidaDto> buscarPorPaisYCiudad(String pais, String ciudad);
+    List<PerfilSalidaDto> buscarPorNombreCompleto(String nombre);
 }

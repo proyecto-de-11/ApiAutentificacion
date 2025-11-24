@@ -56,6 +56,20 @@ public class PerfilController {
         return ResponseEntity.ok(perfilPublico);
     }
 
+    // ✅ NUEVO: Buscar perfiles públicos por nombre de usuario - Todos los usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/publicos/buscar")
+    public ResponseEntity<List<PerfilPublicoDto>> buscarPerfilesPublicosPorNombre(
+            @RequestParam String nombre) {
+        List<PerfilSalidaDto> perfiles = perfilService.buscarPorNombreCompleto(nombre);
+
+        List<PerfilPublicoDto> perfilesPublicos = perfiles.stream()
+                .map(this::mapearAPerfilPublico)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(perfilesPublicos);
+    }
+
     // ✅ Ver por ID: ADMIN o el mismo usuario (usa helper que lanza AccessDeniedException)
     @PreAuthorize("hasRole('ADMINISTRADOR') or @perfilSecurity.canAccess(#id, authentication)")
     @GetMapping("/{id}")
