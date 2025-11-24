@@ -47,11 +47,11 @@ public class PerfilController {
         return ResponseEntity.ok(perfilesPublicos);
     }
 
-    // ✅ NUEVO: Obtener perfil público por ID - Todos los usuarios autenticados
+    // ✅ MODIFICADO: Obtener perfil público por USUARIO ID - Todos los usuarios autenticados
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/publicos/{id}")
-    public ResponseEntity<PerfilPublicoDto> obtenerPerfilPublicoPorId(@PathVariable Integer id) {
-        PerfilSalidaDto perfil = perfilService.obtenerPorId(id);
+    @GetMapping("/publicos/{usuarioId}")
+    public ResponseEntity<PerfilPublicoDto> obtenerPerfilPublicoPorUsuarioId(@PathVariable Integer usuarioId) {
+        PerfilSalidaDto perfil = perfilService.obtenerPorUsuarioId(usuarioId);
         PerfilPublicoDto perfilPublico = mapearAPerfilPublico(perfil);
         return ResponseEntity.ok(perfilPublico);
     }
@@ -143,13 +143,9 @@ public class PerfilController {
      * Método auxiliar para mapear PerfilSalidaDto a PerfilPublicoDto
      * Centraliza la lógica de conversión para reutilización
      */
-    /**
-     * Método auxiliar para mapear PerfilSalidaDto a PerfilPublicoDto
-     * Centraliza la lógica de conversión para reutilización
-     */
     private PerfilPublicoDto mapearAPerfilPublico(PerfilSalidaDto perfil) {
         PerfilPublicoDto dto = new PerfilPublicoDto();
-        dto.setId(perfil.getId()); // ✅ AGREGADO: Mapear el ID del perfil
+        dto.setId(perfil.getId());
         // Obtener usuarioId del objeto usuario
         if (perfil.getUsuario() != null) {
             dto.setUsuarioId(perfil.getUsuario().getId());
@@ -167,7 +163,7 @@ public class PerfilController {
      * Solo contiene los campos básicos visibles para todos los usuarios autenticados
      */
     public static class PerfilPublicoDto {
-        private Integer id; // ✅ AGREGADO: ID del perfil
+        private Integer id;
         private Integer usuarioId;
         private String nombreCompleto;
         private String fotoPerfil;
