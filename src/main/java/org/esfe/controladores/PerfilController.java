@@ -143,8 +143,13 @@ public class PerfilController {
      * Método auxiliar para mapear PerfilSalidaDto a PerfilPublicoDto
      * Centraliza la lógica de conversión para reutilización
      */
+    /**
+     * Método auxiliar para mapear PerfilSalidaDto a PerfilPublicoDto
+     * Centraliza la lógica de conversión para reutilización
+     */
     private PerfilPublicoDto mapearAPerfilPublico(PerfilSalidaDto perfil) {
         PerfilPublicoDto dto = new PerfilPublicoDto();
+        dto.setId(perfil.getId()); // ✅ AGREGADO: Mapear el ID del perfil
         // Obtener usuarioId del objeto usuario
         if (perfil.getUsuario() != null) {
             dto.setUsuarioId(perfil.getUsuario().getId());
@@ -162,12 +167,21 @@ public class PerfilController {
      * Solo contiene los campos básicos visibles para todos los usuarios autenticados
      */
     public static class PerfilPublicoDto {
+        private Integer id; // ✅ AGREGADO: ID del perfil
         private Integer usuarioId;
         private String nombreCompleto;
         private String fotoPerfil;
         private String biografia;
 
         // Getters y Setters
+        public Integer getId() {
+            return id;
+        }
+
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
         public Integer getUsuarioId() {
             return usuarioId;
         }
