@@ -127,7 +127,7 @@ public class PerfilController {
     }
 
     // ✅ Obtener por usuario: ADMIN o el mismo usuario
-    @PreAuthorize("hasRole('ADMINISTRADOR') or #usuarioId == authentication.principal.id")
+    //@PreAuthorize("hasRole('ADMINISTRADOR') or #usuarioId == authentication.principal.id")
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<PerfilSalidaDto> obtenerPorUsuarioId(@PathVariable Integer usuarioId) {
         PerfilSalidaDto perfil = perfilService.obtenerPorUsuarioId(usuarioId);
